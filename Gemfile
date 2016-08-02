@@ -30,3 +30,13 @@ end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
+
+gem 'dop_common',
+  :git => 'https://gitlab.swisscloud.io/clu-dop/dop_common.git',
+  :tag => 'v0.8.1'
+gem 'dopv',
+  :git => 'https://gitlab.swisscloud.io/clu-dop/dopv.git',
+  :tag => 'v0.3.0'
+gem 'dopi',
+  :git => 'https://gitlab.swisscloud.io/clu-dop/dopi.git',
+  :tag => 'v0.13.0'
