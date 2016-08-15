@@ -1,23 +1,15 @@
-module Api
+class Api::V1::ApplicationController < ActionController::API
 
-  module V1
+  include ActionController::MimeResponds
 
-    class ApplicationController < ActionController::API
+  before_action :require_json
 
-      include ActionController::MimeResponds
+  def require_json
+    respond_to :json
+  end
 
-      before_action :require_json
-
-      def require_json
-        respond_to :json
-      end
-
-      def ping
-        render json: {text: 'pong'}
-      end
-
-    end
-
+  def ping
+    render json: {text: 'pong'}
   end
 
 end
