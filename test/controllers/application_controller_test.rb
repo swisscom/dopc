@@ -6,7 +6,7 @@ class ApplicationControllerTest < ActionDispatch::IntegrationTest
     get '/api/v1/ping', as: :json
     json = nil
     json = JSON.parse(@response.body)
-    assert_equal 'pong', json['text']
+    assert_equal 'pong', json['pong']
   end
 
 end
