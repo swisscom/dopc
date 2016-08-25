@@ -47,7 +47,7 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     post '/api/v1/plans', params: {content: Base64.encode64(@plan)}, as: :json
     data = JSON.parse(@response.body)
-    assert_response :conflict
+    assert_response :unprocessable_entity
     assert_not_empty data['error']
   end
 

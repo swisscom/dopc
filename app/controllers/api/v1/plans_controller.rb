@@ -15,15 +15,11 @@ class Api::V1::PlansController < Api::V1::ApiController
   def create
     begin
       hash = YAML.load(Base64.decode64(params[:content]))
+      plan = @cache.add(hash)
+      render json: {name: plan}
     rescue Exception => e
       render json: {error: "Failed to decode content: #{e}"}, status: :unprocessable_entity
       return
-    end
-    begin
-      plan = @cache.add(hash)
-      render json: {name: plan}
-    rescue StandardError => e
-      render json: {error: e.message}, status: :conflict
     end
   end
 
