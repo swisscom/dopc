@@ -23,6 +23,16 @@ settings. The file is ignored by Git.
 * Client must accept `application/json` (`Accept` header)
 * Submitted payload must be `application/json` (`Content-Type` header)
 
+#### GET /v1/ping
+
+Ping the service.
+
+**200 OK**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | pong | Contains value `pong` | yes |
+
 #### GET /v1/plans
 
 Get list of all plans.
@@ -32,7 +42,7 @@ Get list of all plans.
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
 | Array | plans | List of all plans | yes |
-| String | &nbsp;&nbsp;name | Name of plan | no |
+| String | &nbsp;&nbsp;name | Name of the plan | no |
 
 #### POST /v1/plans
 
@@ -48,11 +58,35 @@ Add a new plan.
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
-| String | name | Name of plan | yes |
+| String | name | Name of the plan | yes |
 
 **422 Unprocessable Entity**
 
 If plan content is not valid or plan could not be added.
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | error | Error message | yes |
+
+#### DELETE /v1/plans/{name}
+
+Delete a plan.
+
+**Request Parameters**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | name | Name of the plan | yes |
+
+**200 OK**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | name | Name of plan that was deleted | yes |
+
+**404 Not Found**
+
+If specified plan was not found.
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
