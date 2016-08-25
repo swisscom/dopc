@@ -5,8 +5,7 @@ require 'dop_common/plan_cache'
 class Api::V1::PlansController < Api::V1::ApiController
 
   def initialize
-    # TODO: make path configurable
-    @cache = DopCommon::PlanCache.new('cache')
+    @cache = DopCommon::PlanCache.new(Rails.configuration.cache_dir)
   end
 
   def index
