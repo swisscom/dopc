@@ -12,6 +12,8 @@ See `Gemfile`.
 
 ## Configuration
 
+DOPc will use configuration settings from DOPi/DOPv wherever possible.
+
 See `config/initializers/settings/01_defaults.rb` for custom DOPc settings.
 Create a local file named `02_local.rb` in the same directory to overwrite
 settings. The file is ignored by Git.

@@ -1,11 +1,16 @@
 require 'base64'
 require 'yaml'
 require 'dop_common'
+require 'dopi'
 
 class Api::V1::PlansController < Api::V1::ApiController
 
+  def cache_dir
+    Rails.configuration.respond_to?(:cache_dir) ? Rails.configuration.cache_dir : Dopi.configuration.plan_cache_dir
+  end
+
   def initialize
-    @cache = DopCommon::PlanCache.new(Rails.configuration.cache_dir)
+    @cache = DopCommon::PlanCache.new(cache_dir)
   end
 
   def index
