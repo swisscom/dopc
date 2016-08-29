@@ -92,10 +92,39 @@ If specified plan was not found.
 | --- | --- | --- | --- |
 | String | error | Error message | yes |
 
+#### GET /v1/plans/{name}/check
+
+Check if the plan is valid.
+
+**Request Parameters**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | name | Name of the plan | yes |
+
+**200 OK**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| Boolean | valid | Whether the plan is valid or not | yes |
+
+**404 Not Found**
+
+If specified plan was not found.
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | error | Error message | yes |
+
 ## Caveats
 
 * Service is not protected by any sort of authentication or authorization, this
   is left to the setup (e.g. basic auth with Apache httpd).
+
+## Todo
+
+* Ensure calling DOPi/DOPv from DOPc works exactly the same as calling them
+  directly (command line args, config files, logging, etc.)
 
 ## Authors
 

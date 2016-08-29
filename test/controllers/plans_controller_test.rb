@@ -72,4 +72,15 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
     assert_not_empty data['error']
   end
 
+  test 'check added plan' do
+    post '/api/v1/plans', params: {content: Base64.encode64(@plan)}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :success
+    assert_equal @plan_name, data['name']
+    get "/api/v1/plans/#{@plan_name}/check", as: :json
+    data = JSON.parse(@response.body)
+    assert_response :success
+    assert_equal true, data['valid']
+  end
+
 end
