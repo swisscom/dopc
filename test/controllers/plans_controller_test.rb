@@ -63,6 +63,9 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
     data = JSON.parse(@response.body)
     assert_response :success
     assert_equal @plan_name, data['name']
+    delete "/api/v1/plans/#{@plan_name}", as: :json
+    assert_response :success
+    assert_equal @plan_name, data['name']
   end
 
   test 'can not delete non-existent plan' do
