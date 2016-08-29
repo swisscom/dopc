@@ -60,6 +60,14 @@ Add a new plan.
 | --- | --- | --- | --- |
 | String | name | Name of the plan | yes |
 
+**409 Conflict**
+
+If the plan already exists.
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | error | Error message | yes |
+
 **422 Unprocessable Entity**
 
 If plan content is not valid or plan could not be added.
@@ -125,9 +133,7 @@ If specified plan was not found.
 
 * Ensure calling DOPi/DOPv from DOPc works exactly the same as calling them
   directly (command line args, config files, logging, etc.)
-* Do not catch errors when operating on plan cache, instead make checks first.
-  Catching errors seems too fragile. Exceptions should return internal server
-  errors in API service.
+* Check log clutter and verbose execution during tests
 
 ## Authors
 

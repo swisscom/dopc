@@ -1,6 +1,6 @@
 require 'base64'
 require 'yaml'
-require 'dop_common/plan_cache'
+require 'dop_common'
 
 class Api::V1::PlansController < Api::V1::ApiController
 
@@ -13,27 +13,39 @@ class Api::V1::PlansController < Api::V1::ApiController
   end
 
   def create
-    hash = YAML.load(Base64.decode64(params[:content]))
-    plan = @cache.add(hash)
-    render json: {name: plan}
-  rescue Exception => e
-    render json: {error: "Failed to decode content: #{e}"}, status: :unprocessable_entity
-    return
+    hash = nil
+    begin
+      hash = YAML.load(Base64.decode64(params[:content]))
+    rescue Exception => e
+      render json: {error: "Failed to create plan from content: #{e}"}, status: :unprocessable_entity
+      return
+    end
+    plan = DopCommon::Plan.new(hash)
+    if not plan.valid?
+      render json: {error: "Plan is invalid"}, status: :unprocessable_entity
+      return
+    end
+    if @cache.plan_exists?(plan.name)
+      render json: {error: "Plan already exists"}, status: :conflict
+      return
+    end
+    render json: {name: @cache.add(hash)}
   end
 
   def destroy
-    plan = @cache.remove(params[:id])
-    render json: {name: plan}
-  rescue StandardError => e
-    render json: {error: e.message}, status: :not_found
+    if @cache.plan_exists?(params[:id])
+      render json: {name: @cache.remove(params[:id])}
+    else
+      render json: {error: 'Plan not found'}, status: :not_found
+    end
   end
 
   def check
-    plan = @cache.get(params[:id])
-    valid = plan.valid?
-    render json: {valid: valid}
-  rescue StandardError => e
-    render json: {error: e.message}, status: :not_found
+    if @cache.plan_exists?(params[:id])
+      render json: {valid: @cache.get(params[:id]).valid?}
+    else
+      render json: {error: 'Plan not found'}, status: :not_found
+    end
   end
 
 end

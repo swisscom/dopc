@@ -7,6 +7,7 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
     @tmp = Dir.mktmpdir
     Rails.configuration.cache_dir = @tmp
     @plan = File.read(Rails.root.join('test', 'fixtures', 'plans', 'hello_world.yaml'))
+    @invalid_plan = File.read(Rails.root.join('test', 'fixtures', 'plans', 'invalid.yaml'))
     @plan_name = 'hello_world'
   end
 
@@ -47,12 +48,19 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     post '/api/v1/plans', params: {content: Base64.encode64(@plan)}, as: :json
     data = JSON.parse(@response.body)
+    assert_response :conflict
+    assert_not_empty data['error']
+  end
+
+  test 'can not add plan with invalid content' do
+    post '/api/v1/plans', params: {content: 'abc'}, as: :json
+    data = JSON.parse(@response.body)
     assert_response :unprocessable_entity
     assert_not_empty data['error']
   end
 
   test 'can not add invalid plan' do
-    post '/api/v1/plans', params: {content: 'abc'}, as: :json
+    post '/api/v1/plans', params: {content: Base64.encode64(@invalid_plan)}, as: :json
     data = JSON.parse(@response.body)
     assert_response :unprocessable_entity
     assert_not_empty data['error']
@@ -70,6 +78,20 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
 
   test 'can not delete non-existent plan' do
     delete '/api/v1/plans/test', as: :json
+    data = JSON.parse(@response.body)
+    assert_response :not_found
+    assert_not_empty data['error']
+  end
+
+  test 'can not delete plan twice' do
+    post '/api/v1/plans', params: {content: Base64.encode64(@plan)}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :success
+    assert_equal @plan_name, data['name']
+    delete "/api/v1/plans/#{@plan_name}", as: :json
+    assert_response :success
+    assert_equal @plan_name, data['name']
+    delete "/api/v1/plans/#{@plan_name}", as: :json
     data = JSON.parse(@response.body)
     assert_response :not_found
     assert_not_empty data['error']
