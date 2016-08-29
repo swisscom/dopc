@@ -125,6 +125,9 @@ If specified plan was not found.
 
 * Ensure calling DOPi/DOPv from DOPc works exactly the same as calling them
   directly (command line args, config files, logging, etc.)
+* Do not catch errors when operating on plan cache, instead make checks first.
+  Catching errors seems too fragile. Exceptions should return internal server
+  errors in API service.
 
 ## Authors
 
