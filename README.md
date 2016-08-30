@@ -126,6 +126,29 @@ If specified plan was not found.
 | --- | --- | --- | --- |
 | String | error | Error message | yes |
 
+#### POST /v1/plans/{name}/run
+
+Run a plan.
+
+**Request Parameters**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | name | Name of the plan | yes |
+
+**200 OK**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+
+**404 Not Found**
+
+If specified plan was not found.
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | error | Error message | yes |
+
 ## Caveats
 
 * Service is not protected by any sort of authentication or authorization, this

@@ -1,6 +1,6 @@
-class Dopc::PlanRunJob << ApplicationJob
+class PlanRunJob < ApplicationJob
 
-  queue :default
+  queue_as :default
 
   def perform(plan)
   end

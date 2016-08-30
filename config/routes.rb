@@ -5,6 +5,7 @@ Rails.application.routes.draw do
       resources :plans do
         member do
           get 'check'
+          post 'run'
         end
       end
     end
