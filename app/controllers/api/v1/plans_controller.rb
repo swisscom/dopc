@@ -34,7 +34,7 @@ class Api::V1::PlansController < Api::V1::ApiController
       render json: {error: "Plan already exists"}, status: :conflict
       return
     end
-    render json: {name: @cache.add(hash)}
+    render json: {name: @cache.add(hash)}, status: :created
   end
 
   def destroy

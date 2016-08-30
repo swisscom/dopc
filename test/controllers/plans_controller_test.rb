@@ -26,7 +26,7 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
   test 'list plan' do
     post '/api/v1/plans', params: {content: Base64.encode64(@plan)}, as: :json
     data = JSON.parse(@response.body)
-    assert_response :success
+    assert_response :created
     assert_equal @plan_name, data['name']
     get '/api/v1/plans', as: :json
     data = JSON.parse(@response.body)
@@ -38,14 +38,14 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
   test 'add plan' do
     post '/api/v1/plans', params: {content: Base64.encode64(@plan)}, as: :json
     data = JSON.parse(@response.body)
-    assert_response :success
+    assert_response :created
     assert_equal @plan_name, data['name']
   end
 
   test 'can not add plan twice' do
     post '/api/v1/plans', params: {content: Base64.encode64(@plan)}, as: :json
     data = JSON.parse(@response.body)
-    assert_response :success
+    assert_response :created
     post '/api/v1/plans', params: {content: Base64.encode64(@plan)}, as: :json
     data = JSON.parse(@response.body)
     assert_response :conflict
@@ -69,7 +69,7 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
   test 'delete plan' do
     post '/api/v1/plans', params: {content: Base64.encode64(@plan)}, as: :json
     data = JSON.parse(@response.body)
-    assert_response :success
+    assert_response :created
     assert_equal @plan_name, data['name']
     delete "/api/v1/plans/#{@plan_name}", as: :json
     assert_response :success
@@ -86,7 +86,7 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
   test 'can not delete plan twice' do
     post '/api/v1/plans', params: {content: Base64.encode64(@plan)}, as: :json
     data = JSON.parse(@response.body)
-    assert_response :success
+    assert_response :created
     assert_equal @plan_name, data['name']
     delete "/api/v1/plans/#{@plan_name}", as: :json
     assert_response :success
@@ -100,7 +100,7 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
   test 'check added plan' do
     post '/api/v1/plans', params: {content: Base64.encode64(@plan)}, as: :json
     data = JSON.parse(@response.body)
-    assert_response :success
+    assert_response :created
     assert_equal @plan_name, data['name']
     get "/api/v1/plans/#{@plan_name}/check", as: :json
     data = JSON.parse(@response.body)
