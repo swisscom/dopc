@@ -20,6 +20,20 @@ settings. The file is ignored by Git.
 
 ## API Specification
 
+### General Errors
+
+**406 Not acceptable**
+
+Returned if the client does set an `Accept` HTTP header that does not accept
+`application/json` format. All answers are in JSON format and the client must
+accept it.
+
+**415 Unsupported media type**
+
+Returned if the `Content-Type` HTTP header is set and does not equal
+`application/json`. All payload data sent must be in JSON format and the
+content type header must indicate so if not empty.
+
 ### Version 1
 
 * Client must accept `application/json` (`Accept` header)
