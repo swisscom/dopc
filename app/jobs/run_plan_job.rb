@@ -1,4 +1,4 @@
-class PlanRunJob < ApplicationJob
+class RunPlanJob < ApplicationJob
 
   queue_as :default
 

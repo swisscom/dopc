@@ -56,8 +56,8 @@ class Api::V1::PlansController < Api::V1::ApiController
   def run
     # TODO: check if plan already running
     if @cache.plan_exists?(params[:id])
-      PlanRunJob.perform_later params[:id]
-      render json: {}, status: :created
+      job = RunPlanJob.perform_later(params[:id])
+      render json: {id: job.job_id}, status: :created
     else
       render json: {error: 'Plan not found'}, status: :not_found
     end
