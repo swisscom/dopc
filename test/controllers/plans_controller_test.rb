@@ -108,4 +108,14 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
     assert_equal true, data['valid']
   end
 
+  test 'run added plan' do
+    post '/api/v1/plans', params: {content: Base64.encode64(@plan)}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :created
+    assert_equal @plan_name, data['name']
+    post "/api/v1/plans/#{@plan_name}/run", as: :json
+    data = JSON.parse(@response.body)
+    assert_response :created
+  end
+
 end

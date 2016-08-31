@@ -56,7 +56,7 @@ Add a new plan.
 | --- | --- | --- | --- |
 | String | content | Base64 encoded string with YAML content of the plan | yes |
 
-**200 OK**
+**201 Created**
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
@@ -128,7 +128,7 @@ If specified plan was not found.
 
 #### POST /v1/plans/{name}/run
 
-Run a plan.
+Run a plan. Creates a job to run the plan in the background.
 
 **Request Parameters**
 
@@ -136,7 +136,7 @@ Run a plan.
 | --- | --- | --- | --- |
 | String | name | Name of the plan | yes |
 
-**200 OK**
+**201 Created**
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
