@@ -4,11 +4,13 @@ DOPc combines DOPi and DOPv in one tools and exposes a REST API.
 
 ## Requirements
 
-See `Gemfile`.
+See `Gemfile` for ruby version and gems.
 
 ## Quickstart
 
-1. Run `bundle exec bin/rails s`
+1. Set up Ruby environmnent: RVM, Bundler, etc.
+1. Setup database: `bundle exec rake db:migrate`
+1. Start server: `bundle exec bin/rails s`
 
 ## Configuration
 
@@ -163,16 +165,33 @@ If specified plan was not found.
 | --- | --- | --- | --- |
 | String | error | Error message | yes |
 
+## Implementation
+
+### Overview
+
+TODO
+
+### Tests
+
+TODO
+
+### Interfacing DOPi/DOPv
+
+TODO
+
 ## Caveats
 
 * Service is not protected by any sort of authentication or authorization, this
   is left to the setup (e.g. basic auth with Apache httpd).
+* Plan add/removal is not thread-safe, waiting for new plan store
+  implementation in dop-common.
 
 ## Todo
 
 * Ensure calling DOPi/DOPv from DOPc works exactly the same as calling them
   directly (command line args, config files, logging, etc.)
 * Check log clutter and verbose execution during tests
+* Mocking DOPi/DOPv for testing
 
 ## Authors
 
