@@ -98,9 +98,9 @@ If plan content is not valid or plan could not be added.
 
 Delete a plan.
 
-**Request Parameters**
+**Path Parameters**
 
-| Type | Property | Description | Required |
+| Type | Parameter | Description | Required |
 | --- | --- | --- | --- |
 | String | name | Name of the plan | yes |
 
@@ -122,9 +122,9 @@ If specified plan was not found.
 
 Check if the plan is valid.
 
-**Request Parameters**
+**Path Parameters**
 
-| Type | Property | Description | Required |
+| Type | Parameter | Description | Required |
 | --- | --- | --- | --- |
 | String | name | Name of the plan | yes |
 
@@ -146,11 +146,17 @@ If specified plan was not found.
 
 Run a plan. Creates a job to run the plan in the background.
 
-**Request Parameters**
+**Path Parameters**
+
+| Type | Parameter | Description | Required |
+| --- | --- | --- | --- |
+| String | name | Name of the plan | yes |
+
+**Request Body**
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
-| String | name | Name of the plan | yes |
+| String | stepset | Stepset to run instead of the default | no |
 
 **201 Created**
 
