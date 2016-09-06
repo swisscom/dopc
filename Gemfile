@@ -3,7 +3,6 @@ source 'https://rubygems.org'
 gem 'rails', '~> 5.0.0'
 gem 'puma', '~> 3.0'
 gem 'sqlite3', '~> 1.3.11'
-gem 'delayed_job_active_record', '~> 4.1.1'
 
 gem 'dop_common',
   :git => 'https://gitlab.swisscloud.io/clu-dop/dop_common.git',

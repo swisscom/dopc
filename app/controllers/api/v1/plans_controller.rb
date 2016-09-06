@@ -2,6 +2,7 @@ require 'base64'
 require 'yaml'
 require 'dop_common'
 require 'dopi'
+require 'plan_run_status'
 
 class Api::V1::PlansController < Api::V1::ApiController
 
@@ -54,10 +55,10 @@ class Api::V1::PlansController < Api::V1::ApiController
   end
 
   def run
-    # TODO: check if plan already running
     if @cache.plan_exists?(params[:id])
-      job = RunPlanJob.perform_later(params[:id])
-      render json: {id: job.job_id}, status: :created
+      run = PlanRun.create(plan: params[:id], stepset: params[:stepset], status: PlanRunStatus::NEW)
+      PlanRunner.instance.update(run)
+      render json: {id: run.id}, status: :created
     else
       render json: {error: 'Plan not found'}, status: :not_found
     end
