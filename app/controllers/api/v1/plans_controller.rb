@@ -18,6 +18,16 @@ class Api::V1::PlansController < Api::V1::ApiController
     render json: {plans: @cache.list.collect { |plan| {name: plan}} }
   end
 
+  def show
+    if @cache.plan_exists?(params[:id])
+      plan = @cache.get(params[:id])
+      content = Base64.encode64(plan.to_yaml)
+      render json: {content: content}
+    else
+      render json: {error: 'Plan not found'}, status: :not_found
+    end
+  end
+
   def create
     hash = nil
     begin

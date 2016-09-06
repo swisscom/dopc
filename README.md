@@ -62,6 +62,30 @@ Get list of all plans.
 | Array | plans | List of all plans | yes |
 | String | &nbsp;&nbsp;name | Name of the plan | no |
 
+#### GET /v1/plans/{name}
+
+Get content of a plan.
+
+**Path Parameters**
+
+| Type | Parameter | Description | Required |
+| --- | --- | --- | --- |
+| String | name | Name of the plan | yes |
+
+**200 OK**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | content | Base64 encoded string with YAML content of the plan | yes |
+
+**404 Not Found**
+
+If the specified plan was not found.
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | error | Error message | yes |
+
 #### POST /v1/plans
 
 Add a new plan.
@@ -112,7 +136,7 @@ Delete a plan.
 
 **404 Not Found**
 
-If specified plan was not found.
+If the specified plan was not found.
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
@@ -136,7 +160,7 @@ Check if the plan is valid.
 
 **404 Not Found**
 
-If specified plan was not found.
+If the specified plan was not found.
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
@@ -165,7 +189,7 @@ Run a plan. Creates a job to run the plan in the background.
 
 **404 Not Found**
 
-If specified plan was not found.
+If the specified plan was not found.
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |

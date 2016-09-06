@@ -9,6 +9,7 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
     @plan = File.read(Rails.root.join('test', 'fixtures', 'plans', 'hello_world.yaml'))
     @invalid_plan = File.read(Rails.root.join('test', 'fixtures', 'plans', 'invalid.yaml'))
     @plan_name = 'hello_world'
+    @missing_plan_name = 'does_not_exist'
   end
 
   teardown do
@@ -77,7 +78,7 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'can not delete non-existent plan' do
-    delete '/api/v1/plans/test', as: :json
+    delete "/api/v1/plans/#{@missing_plan_name}", as: :json
     data = JSON.parse(@response.body)
     assert_response :not_found
     assert_not_empty data['error']
@@ -116,6 +117,24 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
     post "/api/v1/plans/#{@plan_name}/run", as: :json
     data = JSON.parse(@response.body)
     assert_response :created
+  end
+
+  test 'get added plan' do
+    post '/api/v1/plans', params: {content: Base64.encode64(@plan)}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :created
+    assert_equal @plan_name, data['name']
+    get "/api/v1/plans/#{@plan_name}", as: :json
+    assert_response :success
+    # Can not compare content, retrieved plan has different formatting
+    #data = JSON.parse(@response.body)
+    #content = Base64.decode64(data['content'])
+    #assert_equal @plan, content
+  end
+
+  test 'can not get non-existent plan' do
+    get "/api/v1/plans/#{@missing_plan_name}", as: :json
+    assert_response :not_found
   end
 
 end
