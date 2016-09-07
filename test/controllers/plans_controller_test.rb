@@ -7,8 +7,10 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
     @tmp = Dir.mktmpdir
     Rails.configuration.cache_dir = @tmp
     @plan = File.read(Rails.root.join('test', 'fixtures', 'plans', 'hello_world.yaml'))
+    @plan2 = File.read(Rails.root.join('test', 'fixtures', 'plans', 'hello_world_2.yaml'))
     @invalid_plan = File.read(Rails.root.join('test', 'fixtures', 'plans', 'invalid.yaml'))
     @plan_name = 'hello_world'
+    @plan2_name = 'hello_world_2'
     @missing_plan_name = 'does_not_exist'
   end
 
@@ -125,16 +127,47 @@ class PlansControllerTest < ActionDispatch::IntegrationTest
     assert_response :created
     assert_equal @plan_name, data['name']
     get "/api/v1/plans/#{@plan_name}", as: :json
+    data = JSON.parse(@response.body)
     assert_response :success
-    # Can not compare content, retrieved plan has different formatting
-    #data = JSON.parse(@response.body)
-    #content = Base64.decode64(data['content'])
-    #assert_equal @plan, content
+    # When the API creates a plan from the YAML the content is slightly
+    # modified, so compare contents from plan objects
+    plan_original = DopCommon::Plan.new(YAML.load(@plan)).instance_variable_get('@hash')
+    plan_dopc = YAML.load(Base64.decode64(data['content']))
+    assert_equal plan_original, plan_dopc
   end
 
   test 'can not get non-existent plan' do
     get "/api/v1/plans/#{@missing_plan_name}", as: :json
     assert_response :not_found
+  end
+
+  test 'update added plan' do
+    post '/api/v1/plans', params: {content: Base64.encode64(@plan)}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :created
+    assert_equal @plan_name, data['name']
+    put "/api/v1/plans/#{@plan_name}", params: {content: Base64.encode64(@plan)}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :success
+    assert_equal @plan_name, data['name']
+  end
+
+  test 'when updating plan names must match' do
+    post '/api/v1/plans', params: {content: Base64.encode64(@plan)}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :created
+    assert_equal @plan_name, data['name']
+    put "/api/v1/plans/#{@plan_name}", params: {content: Base64.encode64(@plan2)}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :unprocessable_entity
+    assert_not_empty data['error']
+  end
+
+  test 'can not update non-existent plan' do
+    put "/api/v1/plans/#{@plan_name}", params: {content: Base64.encode64(@plan)}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :not_found
+    assert_not_empty data['error']
   end
 
 end

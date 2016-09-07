@@ -222,6 +222,7 @@ TODO
   directly (command line args, config files, logging, etc.)
 * Check log clutter and verbose execution during tests
 * Mocking DOPi/DOPv for testing
+* Review what to return in error cases
 
 ## Authors
 

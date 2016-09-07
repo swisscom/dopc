@@ -21,7 +21,8 @@ class Api::V1::PlansController < Api::V1::ApiController
   def show
     if @cache.plan_exists?(params[:id])
       plan = @cache.get(params[:id])
-      content = Base64.encode64(plan.to_yaml)
+      hash = plan.instance_variable_get("@hash")
+      content = Base64.encode64(hash.to_yaml)
       render json: {content: content}
     else
       render json: {error: 'Plan not found'}, status: :not_found
@@ -46,6 +47,31 @@ class Api::V1::PlansController < Api::V1::ApiController
       return
     end
     render json: {name: @cache.add(hash)}, status: :created
+  end
+
+  def update
+    if not @cache.plan_exists?(params[:id])
+      render json: {error: "Plan does not exist"}, status: :not_found
+      return
+    end
+    hash = nil
+    begin
+      hash = YAML.load(Base64.decode64(params[:content]))
+    rescue Exception => e
+      render json: {error: "Failed to create plan from content: #{e}"}, status: :unprocessable_entity
+      return
+    end
+    plan = DopCommon::Plan.new(hash)
+    if params[:id] != plan.name
+      render json: {error: "Plan name does not match name in content"}, status: :unprocessable_entity
+      return
+    end
+    if not plan.valid?
+      render json: {error: "Plan is invalid"}, status: :unprocessable_entity
+      return
+    end
+    @cache.update(plan.name, hash)
+    render json: {name: plan.name}
   end
 
   def destroy
