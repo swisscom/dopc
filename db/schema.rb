@@ -10,15 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160906113850) do
+ActiveRecord::Schema.define(version: 20160907144500) do
 
-  create_table "plan_runs", force: :cascade do |t|
-    t.string   "plan",       null: false
+  create_table "plan_executions", force: :cascade do |t|
+    t.string   "plan",                   null: false
+    t.boolean  "dopi",                   null: false
+    t.boolean  "dopv",                   null: false
     t.string   "stepset"
-    t.integer  "status",     null: false
+    t.integer  "status",     default: 0, null: false
     t.string   "log"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
   end
 
 end

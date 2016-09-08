@@ -8,6 +8,7 @@ Rails.application.routes.draw do
           post 'run'
         end
       end
+      resources :executions
     end
   end
 end

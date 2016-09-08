@@ -60,7 +60,7 @@ Get list of all plans.
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
 | Array | plans | List of all plans | yes |
-| String | &nbsp;&nbsp;name | Name of the plan | no |
+| String | &nbsp;&nbsp;- name | Name of the plan | no |
 
 #### GET /v1/plans/{name}
 
@@ -166,46 +166,52 @@ If the specified plan was not found.
 | --- | --- | --- | --- |
 | String | error | Error message | yes |
 
-#### POST /v1/plans/{name}/run
+#### GET /v1/executions
 
-Run a plan. Creates a job to run the plan in the background.
+Get list of all executions.
 
-**Path Parameters**
+**200 OK**
 
-| Type | Parameter | Description | Required |
+| Type | Property | Description | Required |
 | --- | --- | --- | --- |
-| String | name | Name of the plan | yes |
+| Array | executions: | List of all executions | yes |
+| Integer | &nbsp;&nbsp;- id | ID of the execution | yes |
+| String | &nbsp;&nbsp;- plan | Plan to execute | yes |
+| Boolean | &nbsp;&nbsp;- dopi | Whether to run DOPi | yes |
+| Boolean | &nbsp;&nbsp;- dopv | Whether to run DOPv | yes |
+| String | &nbsp;&nbsp;- status | Execution status | yes |
+| String | &nbsp;&nbsp;- log | Execution log, mostly only in error case | yes |
+
+#### POST /v1/executions
+
+Execute a plan. Creates a job to execute the plan in the background.
 
 **Request Body**
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
-| String | stepset | Stepset to run instead of the default | no |
+| String | plan | The plan to execute | yes |
+| Boolean | dopi | Whether to run the plan with DOPi | yes |
+| Boolean | dopv | Whether to deploy the plan with DOPv | yes |
+| String | stepset | Stepset to run instead of the default, for DOPi | no |
+
+`dopi` and `dopv` can not both be `false` (there would be nothing to execute).
 
 **201 Created**
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
+| Integer | id | ID of the created execution | yes |
 
-**404 Not Found**
+**422 Unprocessable Entity**
 
-If the specified plan was not found.
+If request body has errors.
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
 | String | error | Error message | yes |
 
 ## Implementation
-
-### Overview
-
-TODO
-
-### Tests
-
-TODO
-
-### Interfacing DOPi/DOPv
 
 TODO
 
@@ -222,7 +228,8 @@ TODO
   directly (command line args, config files, logging, etc.)
 * Check log clutter and verbose execution during tests
 * Mocking DOPi/DOPv for testing
-* Review what to return in error cases
+* Review what to return besides error messages in error cases
+* How to notice/recover when workers fail and stop
 
 ## Authors
 
