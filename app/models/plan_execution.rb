@@ -1,6 +1,7 @@
 class PlanExecution < ApplicationRecord
 
   enum status: [:new, :queued, :running, :done, :failed], _prefix: true
+  enum task: [:setup, :run, :deploy, :undeploy], _prefix: true
 
   def run
     self.status_running!
