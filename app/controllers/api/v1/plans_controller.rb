@@ -1,25 +1,22 @@
 require 'base64'
 require 'yaml'
+require 'cache'
 require 'dop_common'
 require 'dopi'
 
 class Api::V1::PlansController < Api::V1::ApiController
 
-  def cache_dir
-    Rails.configuration.respond_to?(:cache_dir) ? Rails.configuration.cache_dir : Dopi.configuration.plan_cache_dir
-  end
-
-  def initialize
-    @cache = DopCommon::PlanCache.new(cache_dir)
+  def cache
+    Cache.plan_cache
   end
 
   def index
-    render json: {plans: @cache.list.collect { |plan| {name: plan}} }
+    render json: {plans: cache.list.collect { |plan| {name: plan}} }
   end
 
   def show
-    if @cache.plan_exists?(params[:id])
-      plan = @cache.get(params[:id])
+    if cache.plan_exists?(params[:id])
+      plan = cache.get(params[:id])
       hash = plan.instance_variable_get("@hash")
       content = Base64.encode64(hash.to_yaml)
       render json: {content: content}
@@ -41,15 +38,15 @@ class Api::V1::PlansController < Api::V1::ApiController
       render json: {error: "Plan is invalid"}, status: :unprocessable_entity
       return
     end
-    if @cache.plan_exists?(plan.name)
+    if cache.plan_exists?(plan.name)
       render json: {error: "Plan already exists"}, status: :conflict
       return
     end
-    render json: {name: @cache.add(hash)}, status: :created
+    render json: {name: cache.add(hash)}, status: :created
   end
 
   def update
-    if not @cache.plan_exists?(params[:id])
+    if not cache.plan_exists?(params[:id])
       render json: {error: "Plan does not exist"}, status: :not_found
       return
     end
@@ -69,21 +66,21 @@ class Api::V1::PlansController < Api::V1::ApiController
       render json: {error: "Plan is invalid"}, status: :unprocessable_entity
       return
     end
-    @cache.update(plan.name, hash)
+    cache.update(plan.name, hash)
     render json: {name: plan.name}
   end
 
   def destroy
-    if @cache.plan_exists?(params[:id])
-      render json: {name: @cache.remove(params[:id])}
+    if cache.plan_exists?(params[:id])
+      render json: {name: cache.remove(params[:id])}
     else
       render json: {error: 'Plan not found'}, status: :not_found
     end
   end
 
   def check
-    if @cache.plan_exists?(params[:id])
-      render json: {valid: @cache.get(params[:id]).valid?}
+    if cache.plan_exists?(params[:id])
+      render json: {valid: cache.get(params[:id]).valid?}
     else
       render json: {error: 'Plan not found'}, status: :not_found
     end
