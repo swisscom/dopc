@@ -8,8 +8,7 @@ class ActiveSupport::TestCase
 
   def setup_tmpcache
     @cachedir = Dir.mktmpdir
-    @cache = DopCommon::PlanCache.new(@cachedir)
-    Cache.plan_cache = @cache
+    Cache.set_plan_cache(@cachedir)
   end
   
   def teardown_tmpcache
