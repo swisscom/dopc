@@ -1,4 +1,4 @@
-require 'dop_common/plan_cache'
+require 'cache'
 require 'dopv'
 require 'dopi'
 
@@ -11,24 +11,24 @@ class PlanExecution < ApplicationRecord
     self.status_running!
     log.info("Started execution #{self.id}")
     case self[:task]
-    when :setup
+    when 'setup'
       dopv_deploy
       dopi_run
-    when :deploy
+    when 'deploy'
       dopv_deploy
-    when :run
+    when 'run'
       dopi_run
-    when :undeploy
+    when 'undeploy'
       dopv_undeploy
     else
-      raise 'Invalid task'
+      raise "Invalid task: #{self[:task]}"
     end
     self.status_done!
     log.info("Done execution #{self.id}")
   rescue => e
     self.status_failed!
-    self.update(log: "Exception: #{e.message}")
-    self.error("Execution #{self.id} failed: #{e.message}")
+    self.update(log: "Error while executing the plan")
+    log.error("Execution #{self.id} failed: #{e.message}: #{e.backtrace.join('\n')}")
   end
 
   private
@@ -38,22 +38,22 @@ class PlanExecution < ApplicationRecord
   end
 
   def cache
-    @cache ||= Cache.get
+    @cache ||= Cache.plan_cache
   end
 
   def dopv_deploy
     log.info("Execution #{self.id}: Deploying with DOPv")
-    Dopv.log(log)
-    plan_file = cache.dump_file(self[:plan])
+    Dopv.logger = log
+    plan_file = cache.yaml_file(self[:plan])
     plan = Dopv::load_plan(plan_file)
-    vol_db = Dopv::load_data_volumes_db(...)
+    vol_db = Dopv::load_data_volumes_db("disks-#{self.id}.db")
     Dopv::run_plan(plan, vol_db, :deploy)
   end
 
   def dopv_undeploy
     log.info("Execution #{self.id}: Undeploying with DOPv")
-    Dopv.log(log)
-    plan_file = cache.dump_file(self[:plan])
+    Dopv.logger = log
+    plan_file = cache.yaml_file(self[:plan])
     plan = Dopv::load_plan(plan_file)
     vol_db = Dopv::load_data_volumes_db("disks-#{self.id}.db")
     Dopv::run_plan(plan, vol_db, :undeploy)
@@ -63,7 +63,7 @@ class PlanExecution < ApplicationRecord
     log.info("Execution #{self.id}: Running DOPi")
     plan = Dopi.load_plan(self[:plan])
     options = {}
-    self[:stepset] ? options.merge!({step_set: self[:stepset]})
+    self[:stepset] ? options.merge!({step_set: self[:stepset]}) :
     Dopi.run_plan(plan, options)
   end
 
