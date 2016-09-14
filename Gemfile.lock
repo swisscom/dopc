@@ -215,10 +215,13 @@ GEM
       json
       stomp
       systemu
+    metaclass (0.0.4)
     method_source (0.8.2)
     mime-types (2.99.2)
     mini_portile2 (2.1.0)
     minitest (5.9.0)
+    mocha (1.1.0)
+      metaclass (~> 0.0.1)
     multi_json (1.12.1)
     net-ssh (2.9.4)
     netrc (0.11.0)
@@ -315,6 +318,7 @@ DEPENDENCIES
   dopi!
   dopv!
   listen (~> 3.0.5)
+  mocha (~> 1.1.0)
   puma (~> 3.0)
   rails (~> 5.0.0)
   spring

@@ -16,7 +16,7 @@ gem 'dopi',
 
 group :development, :test do
   gem 'byebug', platform: :mri
-  #gem 'mocha', '~> 1.1.0'
+  gem 'mocha', '~> 1.1.0'
 end
 
 group :development do

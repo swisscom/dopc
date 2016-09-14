@@ -177,8 +177,8 @@ Get list of all executions.
 | Array | executions: | List of all executions | yes |
 | Integer | &nbsp;&nbsp;- id | ID of the execution | yes |
 | String | &nbsp;&nbsp;- plan | Plan to execute | yes |
-| Boolean | &nbsp;&nbsp;- dopi | Whether to run DOPi | yes |
-| Boolean | &nbsp;&nbsp;- dopv | Whether to run DOPv | yes |
+| String | &nbsp;&nbsp;- task | Task to execute | yes |
+| String | &nbsp;&nbsp;- stepset | Stepset to execute instead of default | yes |
 | String | &nbsp;&nbsp;- status | Execution status | yes |
 | String | &nbsp;&nbsp;- log | Execution log, mostly only in error case | yes |
 
@@ -191,11 +191,8 @@ Execute a plan. Creates a job to execute the plan in the background.
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
 | String | plan | The plan to execute | yes |
-| Boolean | dopi | Whether to run the plan with DOPi | yes |
-| Boolean | dopv | Whether to deploy the plan with DOPv | yes |
+| String | task | Task to execute, must be one of: deploy, undeploy, run or setup (deploy + run). | yes |
 | String | stepset | Stepset to run instead of the default, for DOPi | no |
-
-`dopi` and `dopv` can not both be `false` (there would be nothing to execute).
 
 **201 Created**
 

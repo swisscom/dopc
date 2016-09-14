@@ -26,5 +26,12 @@ class ActiveSupport::TestCase
   def decode_plan(content)
     YAML.load(Base64.decode64(content))
   end
+
+  def add_plan(name)
+    post '/api/v1/plans', params: {content: encode_plan(name)}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :created
+    assert_equal name, data['name']
+  end
   
 end
