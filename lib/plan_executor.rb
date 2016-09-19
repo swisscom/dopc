@@ -83,7 +83,10 @@ class PlanExecutor
         begin
           task = nil
           task = @tasks.pop(true)
-          task.run if task
+          if task
+            task.run
+            self.update
+          end
         rescue ThreadError
           # Queue is empty
           sleep 1
@@ -91,9 +94,8 @@ class PlanExecutor
           # Is it clever to retry in any error case? Could loop indefinitely.
           @log.error("Unexpected error in worker: #{e.message}: #{e.backtrace.join('\n')}")
           task.status_failed! if task
-          sleep 1
-        ensure
           self.update
+          sleep 1
         end
       end
       @worker_lock.synchronize do
