@@ -182,6 +182,21 @@ Get list of all executions.
 | String | &nbsp;&nbsp;- status | Execution status | yes |
 | String | &nbsp;&nbsp;- log | Execution log, mostly only in error case | yes |
 
+#### GET /v1/executions/{id}
+
+Get an execution.
+
+**200 OK**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| Integer | id | ID of the execution | yes |
+| String | plan | Plan to execute | yes |
+| String | task | Task to execute | yes |
+| String | stepset | Stepset to execute instead of default | yes |
+| String | status | Execution status | yes |
+| String | log | Execution log, mostly only in error case | yes |
+
 #### POST /v1/executions
 
 Execute a plan. Creates a job to execute the plan in the background.

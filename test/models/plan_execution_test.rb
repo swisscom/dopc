@@ -6,14 +6,14 @@ class PlanExecutionTest < ActiveSupport::TestCase
   fixtures :plan_executions
 
   test 'fixtures count' do
-    assert_equal 3, PlanExecution.count
+    assert_equal 1, PlanExecution.count
   end
 
   test 'add plan' do
     new = PlanExecution.create(plan: 'myplan', task: :setup, stepset: 'default', status: :new)
     id = new.id
     exec = PlanExecution.find(id)
-    assert_equal 4, exec.id
+    assert_equal 2, exec.id
     assert_equal 'myplan', exec.plan
     assert_equal 'setup', exec.task
     assert_equal true, exec.task_setup?

@@ -22,4 +22,13 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
     render json: {id: exec.id}, status: :created
   end
 
+  def show
+    execution = PlanExecution.find(params[:id])
+    if execution
+      render json: execution.to_hash
+    else
+      render json: {error: 'Execution not found'}, status: :not_found
+    end
+  end
+
 end

@@ -30,14 +30,18 @@ class PlanExecution < ApplicationRecord
     log.error("Execution #{self.id} failed: #{e.message}: #{e.backtrace.join('\n')}")
   end
 
+  def to_hash
+    {id: self[:id], plan: self[:plan], task: self[:task], stepset: self[:stepset], status: self[:status], log: self[:log]}
+  end
+
   private
 
   def cache
-    @cache ||= DopCommon::PlanCache.new(Dopi.configuration.plan_cache_dir)
+    DopCommon::PlanCache.new(Dopi.configuration.plan_cache_dir)
   end
 
   def log
-    @log ||= Rails.logger
+    Rails.logger
   end
 
   def dopv_deploy
