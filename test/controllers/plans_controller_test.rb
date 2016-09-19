@@ -3,11 +3,12 @@ require 'test_helper'
 class PlansControllerTest < ActionDispatch::IntegrationTest
 
   setup do
-    setup_tmpcache
+    setup_tmp
+    mock_cache
   end
 
   teardown do
-    teardown_tmpcache
+    teardown_tmp
   end
 
   test 'list no plans' do

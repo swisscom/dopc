@@ -1,14 +1,9 @@
 require 'base64'
 require 'yaml'
-require 'cache'
 require 'dop_common'
 require 'dopi'
 
 class Api::V1::PlansController < Api::V1::ApiController
-
-  def cache
-    Cache.plan_cache
-  end
 
   def index
     render json: {plans: cache.list.collect { |plan| {name: plan}} }
@@ -84,6 +79,12 @@ class Api::V1::PlansController < Api::V1::ApiController
     else
       render json: {error: 'Plan not found'}, status: :not_found
     end
+  end
+
+  private
+
+  def cache
+    DopCommon::PlanCache.new(Dopi.configuration.plan_cache_dir)
   end
 
 end

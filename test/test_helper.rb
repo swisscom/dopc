@@ -2,21 +2,54 @@ ENV['RAILS_ENV'] ||= 'test'
 
 require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
-require 'cache'
+require 'mocha/test_unit'
 
 class ActiveSupport::TestCase
 
-  def setup_tmpcache
-    @cachedir = Dir.mktmpdir
-    Cache.set_plan_cache(@cachedir)
-  end
-  
-  def teardown_tmpcache
-    FileUtils.remove_entry @cachedir
+  def setup_tmp
+    @tmpdir = Dir.mktmpdir
   end
 
+  def teardown_tmp
+    FileUtils.remove_entry @tmpdir
+  end
+
+  def mock_cache
+    @cachedir = File.join(@tmpdir, 'cache')
+    DopCommon::PlanCache.unstub(:new)
+    plancache = DopCommon::PlanCache.new(@cachedir)
+    DopCommon::PlanCache.stubs(:new).returns(plancache)
+    Dopi.configuration.plan_cache_dir = @cachedir
+  end
+
+  def mock_dopv
+    Dopv.unstub(:load_data_volumes_db)
+    Dopv.stubs(:load_data_volumes_db).returns(nil)
+    Dopv.unstub(:run_plan)
+    Dopv.stubs(:run_plan).returns(nil)
+  end
+
+  def mock_dopv_fail
+    Dopv.unstub(:run_plan)
+    Dopv.stubs(:run_plan).raises(Exception, 'Testing error')
+  end
+
+  def mock_dopi
+    Dopi.unstub(:run_plan)
+    Dopi.stubs(:run_plan).returns(nil)
+  end
+
+  def mock_dopi_fail
+    Dopi.unstub(:run_plan)
+    Dopi.stubs(:run_plan).raises(Exception, 'Testing error')
+  end
+
+  def plan_file(name)
+    Rails.root.join('test', 'fixtures', 'plans', "#{name}.yaml")
+  end
+  
   def read_plan(name)
-    File.read(Rails.root.join('test', 'fixtures', 'plans', "#{name}.yaml"))
+    File.read(plan_file(name))
   end
 
   def encode_plan(name)
@@ -28,10 +61,8 @@ class ActiveSupport::TestCase
   end
 
   def add_plan(name)
-    post '/api/v1/plans', params: {content: encode_plan(name)}, as: :json
-    data = JSON.parse(@response.body)
-    assert_response :created
-    assert_equal name, data['name']
+    cache = DopCommon::PlanCache.new(Dopi.configuration.plan_cache_dir)
+    cache.add(plan_file(name))
   end
-  
+
 end

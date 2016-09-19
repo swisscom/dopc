@@ -1,4 +1,3 @@
-require 'cache'
 require 'dopv'
 require 'dopi'
 
@@ -33,12 +32,12 @@ class PlanExecution < ApplicationRecord
 
   private
 
-  def log
-    @log ||= Rails.logger
+  def cache
+    @cache ||= DopCommon::PlanCache.new(Dopi.configuration.plan_cache_dir)
   end
 
-  def cache
-    @cache ||= Cache.plan_cache
+  def log
+    @log ||= Rails.logger
   end
 
   def dopv_deploy

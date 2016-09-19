@@ -92,6 +92,8 @@ class PlanExecutor
           @log.error("Unexpected error in worker: #{e.message}: #{e.backtrace.join('\n')}")
           task.status_failed! if task
           sleep 1
+        ensure
+          self.update
         end
       end
       @worker_lock.synchronize do
@@ -107,7 +109,8 @@ class PlanExecutor
   end
 
   def can_run?(exec)
-    true
+    PlanExecution.where(plan: exec.plan, status: :running).empty? and
+      PlanExecution.where(plan: exec.plan, status: :queued).empty?
   end
 
 end
