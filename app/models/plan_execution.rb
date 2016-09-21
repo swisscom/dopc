@@ -8,7 +8,7 @@ class PlanExecution < ApplicationRecord
 
   def run
     self.status_running!
-    log.info("Started execution #{self.id}")
+    log.info("Execution #{self.id}") {'started'}
     case self[:task]
     when 'setup'
       dopv_deploy
@@ -23,11 +23,11 @@ class PlanExecution < ApplicationRecord
       raise "Invalid task: #{self[:task]}"
     end
     self.status_done!
-    log.info("Done execution #{self.id}")
+    log.info("Execution #{self.id}") {'done'}
   rescue => e
     self.status_failed!
     self.update(log: "Error while executing the plan")
-    log.error("Execution #{self.id} failed: #{e.message}: #{e.backtrace.join('\n')}")
+    log.error("Execution #{self.id}") {"failed: #{e.message}: #{e.backtrace.join('\n')}"}
   end
 
   def to_hash
@@ -45,7 +45,7 @@ class PlanExecution < ApplicationRecord
   end
 
   def dopv_deploy
-    log.info("Execution #{self.id}: Deploying with DOPv")
+    log.info("Execution #{self.id}") {'deploying with DOPv'}
     Dopv.logger = log
     plan_file = cache.yaml_file(self[:plan])
     plan = Dopv::load_plan(plan_file)
@@ -54,7 +54,7 @@ class PlanExecution < ApplicationRecord
   end
 
   def dopv_undeploy
-    log.info("Execution #{self.id}: Undeploying with DOPv")
+    log.info("Execution #{self.id}") {'undeploying with DOPv'}
     Dopv.logger = log
     plan_file = cache.yaml_file(self[:plan])
     plan = Dopv::load_plan(plan_file)
@@ -63,7 +63,7 @@ class PlanExecution < ApplicationRecord
   end
 
   def dopi_run
-    log.info("Execution #{self.id}: Running DOPi")
+    log.info("Execution #{self.id}") {'running DOPi'}
     plan = Dopi.load_plan(self[:plan])
     options = {}
     self[:stepset] ? options.merge!({step_set: self[:stepset]}) :
