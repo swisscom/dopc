@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class ApiControllerTest < ActionDispatch::IntegrationTest
+class JsonTest < ActionDispatch::IntegrationTest
 
   test 'accept json' do
     get '/api/v1/ping', headers: {'Accept' => 'application/json', 'Content-Type' => 'application/json'}
@@ -35,7 +35,7 @@ class ApiControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test 'can not send non-json' do
+  test 'can not send text' do
     get '/api/v1/ping', headers: {'Accept' => 'application/json', 'Content-Type' => 'text/plain'}
     data = JSON.parse(@response.body)
     assert_response :unsupported_media_type

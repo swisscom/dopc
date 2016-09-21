@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class ExecutionsControllerTest < ActionDispatch::IntegrationTest
+class ExecutionsTest < ActionDispatch::IntegrationTest
 
   self.use_transactional_tests = true
 

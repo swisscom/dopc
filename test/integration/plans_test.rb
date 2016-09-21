@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class PlansControllerTest < ActionDispatch::IntegrationTest
+class PlansTest < ActionDispatch::IntegrationTest
 
   setup do
     setup_tmp

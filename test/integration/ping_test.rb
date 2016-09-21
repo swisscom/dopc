@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class ApplicationControllerTest < ActionDispatch::IntegrationTest
+class PingTest < ActionDispatch::IntegrationTest
 
   test 'ping returns pong' do
     get '/api/v1/ping', as: :json

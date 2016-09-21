@@ -1,7 +1,0 @@
-hello_world_new:
-  id: 1
-  plan: hello_world
-  task: 0
-  stepset: default
-  status: 0
-  log:
