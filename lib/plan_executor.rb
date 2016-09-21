@@ -56,14 +56,14 @@ class PlanExecutor
   def restore_tasks
     PlanExecution.where(status: :queued).each do |exec|
       @tasks << exec
-      @log.info('Executor') {"Re-queuing execution #{exec.id}"}
+      @log.info('Executor') {"re-queuing execution #{exec.id}"}
     end
   end
 
   def clear_running
     PlanExecution.where(status: :running).each do |exec|
       exec.status_failed!
-      @log.info('Executor') {"Clearing execution #{exec.id}, setting to failed"}
+      @log.info('Executor') {"clearing execution #{exec.id}, setting to failed"}
     end
   end
 
@@ -72,7 +72,7 @@ class PlanExecutor
       if can_run?(exec)
         exec.status_queued!
         @tasks << exec
-        @log.info('Executor') {"Queued execution #{exec.id}"}
+        @log.info('Executor') {"queued execution #{exec.id}"}
       end
     end
   end
@@ -93,7 +93,7 @@ class PlanExecutor
           sleep 1
         rescue => e
           # Is it clever to retry in any error case? Could loop indefinitely.
-          @log.error("Worker #{worker_id}") {"Unexpected error: #{e.message}: #{e.backtrace.join('\n')}"}
+          @log.error("Worker #{worker_id}") {"unexpected error: #{e.message}: #{e.backtrace.join('\n')}"}
           task.status_failed! if task
           self.update
           sleep 1
