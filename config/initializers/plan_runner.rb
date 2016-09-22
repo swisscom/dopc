@@ -1,8 +1,8 @@
-require 'plan_executor'
+require 'plan_runner'
 
-# Run plan executor, except:
+# Start plan runner, except:
 #   * when testing
 #   * running rake, such as 'rake db:migrate'
 unless (File.basename($0) == 'rake') or Rails.env.test?
-  PlanExecutor.instance.start
+  PlanRunner.instance.start
 end

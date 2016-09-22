@@ -1,7 +1,7 @@
 require 'singleton'
 require 'set'
 
-class PlanExecutor
+class PlanExecutor2
 
   include Singleton
 
@@ -9,8 +9,8 @@ class PlanExecutor
     @num_workers = num_workers
     @tasks = Queue.new
     @workers = Set.new
-    @executor_lock = Mutex.new
-    @worker_lock = Mutex.new
+    @executor_lock = Monitor.new
+    @worker_lock = Monitor.new
     @run_workers = true
     @log = Rails.logger
   end
@@ -23,8 +23,6 @@ class PlanExecutor
         restore_tasks
         enqueue_new
         start_workers
-      else
-        raise 'Workers are not empty'
       end
     end
   end
@@ -49,6 +47,14 @@ class PlanExecutor
 
   def running?
     not @workers.empty?
+  end
+
+  def work_off
+    @executor_lock.synchronize do
+      self.start
+      @workers.each do |w|
+        w.join
+    end
   end
 
   private
@@ -90,13 +96,13 @@ class PlanExecutor
           end
         rescue ThreadError
           # Queue is empty
-          sleep 1
+          sleep 0.1
         rescue => e
           # Is it clever to retry in any error case? Could loop indefinitely.
           @log.error("Worker #{worker_id}") {"unexpected error: #{e.message}: #{e.backtrace.join('\n')}"}
           task.status_failed! if task
           self.update
-          sleep 1
+          sleep 0.1
         end
       end
       @worker_lock.synchronize do
