@@ -6,6 +6,26 @@ class PlanExecution < ApplicationRecord
   enum status: [:new, :queued, :running, :done, :failed], _prefix: true
   enum task: [:setup, :run, :deploy, :undeploy], _prefix: true
 
+  def self.log
+    Delayed::Worker.logger
+  end
+
+  def self.schedule
+    log.info('Checking for new plan executions')
+    PlanExecution.transaction do
+      # TODO: Optimize query?
+      PlanExecution.where(status: :new).group(:plan).having('id = MIN(id)').each do |pe|
+        numQueued = PlanExecution.where(plan: pe.plan, status: :queued).count
+        numRunning = PlanExecution.where(plan: pe.plan, status: :running).count
+        if numQueued == 0 and numRunning == 0
+          pe.status_queued!
+          ExecutePlanJob.perform_later(pe)
+          log.info("Scheduled execution #{pe.id}")
+        end
+      end
+    end
+  end
+
   def run
     self.status_running!
     log.info("Execution #{self.id}") {'started'}
@@ -28,6 +48,8 @@ class PlanExecution < ApplicationRecord
     self.status_failed!
     self.update(log: "Error while executing the plan")
     log.error("Execution #{self.id}") {"failed: #{e.message}: #{e.backtrace.join('\n')}"}
+  ensure
+    self.class.schedule
   end
 
   def to_hash
@@ -41,7 +63,7 @@ class PlanExecution < ApplicationRecord
   end
 
   def log
-    Rails.logger
+    Delayed::Worker.logger
   end
 
   def dopv_deploy

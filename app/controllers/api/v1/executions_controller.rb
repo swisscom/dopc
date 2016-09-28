@@ -18,7 +18,7 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
       return
     end
     exec = PlanExecution.create(plan: params[:plan], task: params[:task], stepset: params[:stepset], status: :new)
-    PlanRunner.instance.update
+    PlanExecution.schedule
     render json: {id: exec.id}, status: :created
   end
 

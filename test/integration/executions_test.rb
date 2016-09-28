@@ -21,11 +21,16 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     assert_response :created
     data = JSON.parse(@response.body)
     id = data['id']
-    assert_equal 2, id
+    assert_equal 1, id
     get "/api/v1/executions/#{id}", as: :json
     assert_response :success
     data = JSON.parse(@response.body)
-    assert_equal({'id' => id, 'plan' => 'hello_world', 'task' => 'setup', 'stepset' => nil, 'status' => 'new', 'log' => nil}, data)
+    # Must not check status, could be either new or already queued
+    assert_equal id, data['id']
+    assert_equal 'hello_world', data['plan']
+    assert_equal 'setup', data['task']
+    assert_equal nil, data['stepset']
+    assert_equal nil, data['log']
   end
 
   test 'invalid task' do
@@ -40,7 +45,7 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     assert_response :success
     data = JSON.parse(@response.body)
     execution = data['executions'].first
-    assert_equal({'id' => 1, 'plan' => 'hello_world', 'task' => 'setup', 'stepset' => 'default', 'status' => 'new', 'log' => nil}, execution)
+    assert_equal nil, execution
   end
 
 end
