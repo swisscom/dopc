@@ -16,9 +16,9 @@ class ActiveSupport::TestCase
 
   def mock_cache
     @cachedir = File.join(@tmpdir, 'cache')
-    DopCommon::PlanCache.unstub(:new)
-    plancache = DopCommon::PlanCache.new(@cachedir)
-    DopCommon::PlanCache.stubs(:new).returns(plancache)
+    DopCommon::PlanStore.unstub(:new)
+    plancache = DopCommon::PlanStore.new(@cachedir)
+    DopCommon::PlanStore.stubs(:new).returns(plancache)
     Dopi.configuration.plan_cache_dir = @cachedir
   end
 
@@ -57,11 +57,11 @@ class ActiveSupport::TestCase
   end
 
   def decode_plan(content)
-    YAML.load(Base64.decode64(content))
+    Base64.decode64(content)
   end
 
   def add_plan(name)
-    cache = DopCommon::PlanCache.new(Dopi.configuration.plan_cache_dir)
+    cache = DopCommon::PlanStore.new(Dopi.configuration.plan_cache_dir)
     cache.add(plan_file(name))
   end
 

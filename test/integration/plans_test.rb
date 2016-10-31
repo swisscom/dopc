@@ -44,7 +44,7 @@ class PlansTest < ActionDispatch::IntegrationTest
     assert_response :created
     post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
     data = JSON.parse(@response.body)
-    assert_response :conflict
+    assert_response :bad_request
     assert_not_empty data['error']
   end
 
@@ -58,7 +58,7 @@ class PlansTest < ActionDispatch::IntegrationTest
   test 'can not add invalid plan' do
     post '/api/v1/plans', params: {content: encode_plan('invalid')}, as: :json
     data = JSON.parse(@response.body)
-    assert_response :unprocessable_entity
+    assert_response :bad_request
     assert_not_empty data['error']
   end
 
@@ -93,17 +93,6 @@ class PlansTest < ActionDispatch::IntegrationTest
     assert_not_empty data['error']
   end
 
-  test 'check added plan' do
-    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
-    data = JSON.parse(@response.body)
-    assert_response :created
-    assert_equal 'hello_world', data['name']
-    get '/api/v1/plans/hello_world/check', as: :json
-    data = JSON.parse(@response.body)
-    assert_response :success
-    assert_equal true, data['valid']
-  end
-
   test 'get added plan' do
     post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
     data = JSON.parse(@response.body)
@@ -113,10 +102,10 @@ class PlansTest < ActionDispatch::IntegrationTest
     data = JSON.parse(@response.body)
     assert_response :success
     # When the API creates a plan from the YAML the content is slightly
-    # modified, so compare contents from plan objects
-    plan_original = DopCommon::Plan.new(YAML.load(read_plan('hello_world'))).instance_variable_get('@hash')
-    plan_dopc = decode_plan(data['content'])
-    assert_equal plan_original, plan_dopc
+    # modified, so compare YAML contents, not strings
+    plan_orig = YAML.load(read_plan('hello_world'))
+    plan_dopc = YAML.load(decode_plan(data['content']))
+    assert_equal plan_orig, plan_dopc
   end
 
   test 'can not get non-existent plan' do
@@ -129,7 +118,7 @@ class PlansTest < ActionDispatch::IntegrationTest
     data = JSON.parse(@response.body)
     assert_response :created
     assert_equal 'hello_world', data['name']
-    put '/api/v1/plans/hello_world', params: {content: encode_plan('hello_world')}, as: :json
+    put '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
     data = JSON.parse(@response.body)
     assert_response :success
     assert_equal 'hello_world', data['name']
@@ -140,17 +129,34 @@ class PlansTest < ActionDispatch::IntegrationTest
     data = JSON.parse(@response.body)
     assert_response :created
     assert_equal 'hello_world', data['name']
-    put '/api/v1/plans/hello_world', params: {content: encode_plan('hello_world_2')}, as: :json
+    put '/api/v1/plans', params: {content: encode_plan('hello_world_2')}, as: :json
     data = JSON.parse(@response.body)
-    assert_response :unprocessable_entity
+    assert_response :bad_request
     assert_not_empty data['error']
   end
 
   test 'can not update non-existent plan' do
-    put '/api/v1/plans/hello_world', params: {content: encode_plan('hello_world')}, as: :json
+    put '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
     data = JSON.parse(@response.body)
-    assert_response :not_found
+    assert_response :bad_request
     assert_not_empty data['error']
+  end
+
+  test 'get versions' do
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :created
+    assert_equal 'hello_world', data['name']
+    put '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :success
+    assert_equal 'hello_world', data['name']
+    get '/api/v1/plans/hello_world/versions', as: :json
+    data = JSON.parse(@response.body)
+    assert_response :success
+    assert_kind_of Array, data['versions']
+    assert_equal 2, data['versions'].size
+    assert_not_empty data['versions'].first
   end
 
 end

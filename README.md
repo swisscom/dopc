@@ -72,11 +72,42 @@ Get content of a plan.
 | --- | --- | --- | --- |
 | String | name | Name of the plan | yes |
 
+**Request Body**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | version | Version string, if not specified then 'latest' is assumed. | no |
+
 **200 OK**
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
 | String | content | Base64 encoded string with YAML content of the plan | yes |
+
+**404 Not Found**
+
+If the specified plan or version was not found.
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | error | Error message | yes |
+
+#### GET /v1/plans/{name}/versions
+
+Get a list of all versions of a plan.
+
+**Path Parameters**
+
+| Type | Parameter | Description | Required |
+| --- | --- | --- | --- |
+| String | name | Name of the plan | yes |
+
+**200 OK**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| Array | versions | List of all versions | yes |
+| String | &nbsp;&nbsp;- name | Name of the version | no |
 
 **404 Not Found**
 
@@ -102,17 +133,49 @@ Add a new plan.
 | --- | --- | --- | --- |
 | String | name | Name of the plan | yes |
 
-**409 Conflict**
+**422 Unprocessable Entity**
 
-If the plan already exists.
+If the content can not be loaded.
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
 | String | error | Error message | yes |
 
+**400 Bad Request**
+
+If the plan can not be added, e.g. it already exists or is invalid.
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | error | Error message | yes |
+
+#### PUT /v1/plans
+
+Update an existing plan, creating a new version.
+
+**Request Body**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | content | Base64 encoded string with YAML content of the plan | yes |
+
+**200 Success**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | name | Name of the plan | yes |
+
 **422 Unprocessable Entity**
 
-If plan content is not valid or plan could not be added.
+If the content can not be loaded.
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | error | Error message | yes |
+
+**400 Bad Request**
+
+If the plan can not be added, e.g. the name in the content does not match.
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
@@ -120,7 +183,7 @@ If plan content is not valid or plan could not be added.
 
 #### DELETE /v1/plans/{name}
 
-Delete a plan.
+Delete a plan (and all its versions).
 
 **Path Parameters**
 
@@ -133,30 +196,6 @@ Delete a plan.
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
 | String | name | Name of plan that was deleted | yes |
-
-**404 Not Found**
-
-If the specified plan was not found.
-
-| Type | Property | Description | Required |
-| --- | --- | --- | --- |
-| String | error | Error message | yes |
-
-#### GET /v1/plans/{name}/check
-
-Check if the plan is valid.
-
-**Path Parameters**
-
-| Type | Parameter | Description | Required |
-| --- | --- | --- | --- |
-| String | name | Name of the plan | yes |
-
-**200 OK**
-
-| Type | Property | Description | Required |
-| --- | --- | --- | --- |
-| Boolean | valid | Whether the plan is valid or not | yes |
 
 **404 Not Found**
 

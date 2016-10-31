@@ -1,3 +1,4 @@
+require 'dop_common'
 require 'dopv'
 require 'dopi'
 
@@ -59,7 +60,7 @@ class PlanExecution < ApplicationRecord
   private
 
   def cache
-    DopCommon::PlanCache.new(Dopi.configuration.plan_cache_dir)
+    DopCommon::PlanStore.new(Dopi.configuration.plan_cache_dir)
   end
 
   def log
