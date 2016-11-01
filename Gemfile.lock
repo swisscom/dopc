@@ -10,10 +10,10 @@ GIT
 
 GIT
   remote: https://gitlab.swisscloud.io/clu-dop/dopi.git
-  revision: 9c549c0c0f6aaba40d3430c66bd5bdaa53fe4478
-  tag: v0.13.0
+  revision: f860bc611207ede0593898f7901d8d408f5850de
+  tag: master
   specs:
-    dopi (0.13.0)
+    dopi (0.13.1)
       curses (~> 1)
       dop_common (= 0.8.1)
       gli (~> 2)
@@ -25,24 +25,25 @@ GIT
 
 GIT
   remote: https://gitlab.swisscloud.io/clu-dop/dopv.git
-  revision: 7ccebe0ca0a888dea415866536eaf5df95cfc48c
-  tag: v0.3.0
+  revision: a90f7be1beb21353d8673b7061f0b5d58cd51a0b
+  tag: master
   specs:
-    dopv (0.3.0)
+    dopv (0.3.6)
       colorize (~> 0.7.5)
       fog (~> 1.31.0)
       fog-google (< 0.1.1)
+      fog-profitbricks (~> 0.0.5)
       gli (~> 2.13.1)
       json (~> 1.8)
       net-ssh (< 3.0)
-      rbovirt (~> 0.1.1)
+      rbovirt (~> 0.1.2)
       rbvmomi (~> 1.8.2)
       rest-client (~> 1.7)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    CFPropertyList (2.3.2)
+    CFPropertyList (2.3.3)
     actioncable (5.0.0)
       actionpack (= 5.0.0)
       nio4r (~> 1.2)
@@ -93,10 +94,10 @@ GEM
     delayed_job_active_record (4.1.1)
       activerecord (>= 3.0, < 5.1)
       delayed_job (>= 3.0, < 5)
-    domain_name (0.5.20160615)
+    domain_name (0.5.20161021)
       unf (>= 0.0.5, < 1.0.0)
     erubis (2.7.0)
-    excon (0.51.0)
+    excon (0.54.0)
     ffi (1.9.14)
     fission (0.5.0)
       CFPropertyList (~> 2.2)
@@ -126,7 +127,7 @@ GEM
     fog-atmos (0.1.0)
       fog-core
       fog-xml
-    fog-aws (0.10.0)
+    fog-aws (0.12.0)
       fog-core (~> 1.38)
       fog-json (~> 1.0)
       fog-xml (~> 0.1)
@@ -135,7 +136,7 @@ GEM
       fog-core (~> 1.22)
       fog-json
       inflecto (~> 0.0.2)
-    fog-core (1.42.0)
+    fog-core (1.43.0)
       builder
       excon (~> 0.49)
       formatador (~> 0.2)
@@ -149,7 +150,7 @@ GEM
     fog-json (1.0.2)
       fog-core (~> 1.0)
       multi_json (~> 1.10)
-    fog-local (0.3.0)
+    fog-local (0.3.1)
       fog-core (~> 1.27)
     fog-powerdns (0.1.1)
       fog-core (~> 1.27)
@@ -173,7 +174,7 @@ GEM
     fog-serverlove (0.1.2)
       fog-core
       fog-json
-    fog-softlayer (1.1.3)
+    fog-softlayer (1.1.4)
       fog-core
       fog-json
     fog-storm_on_demand (0.1.1)
@@ -200,16 +201,14 @@ GEM
     gyoku (1.3.1)
       builder (>= 2.1.2)
     hashdiff (0.3.0)
-    hiera (3.2.0)
-      json_pure
-    http-cookie (1.0.2)
+    hiera (3.2.1)
+    http-cookie (1.0.3)
       domain_name (~> 0.5)
-    httpclient (2.8.0)
+    httpclient (2.8.2.4)
     i18n (0.7.0)
     inflecto (0.0.2)
     ipaddress (0.8.3)
     json (1.8.3)
-    json_pure (2.0.2)
     listen (3.0.8)
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
@@ -223,7 +222,7 @@ GEM
       nokogiri (>= 1.5.9)
     mail (2.6.4)
       mime-types (>= 1.16, < 4)
-    mcollective-client (2.8.4)
+    mcollective-client (2.9.0)
       json
       stomp
       systemu
@@ -279,7 +278,7 @@ GEM
     rb-fsevent (0.9.7)
     rb-inotify (0.9.7)
       ffi (>= 0.5.0)
-    rbovirt (0.1.1)
+    rbovirt (0.1.2)
       nokogiri
       rest-client (> 1.7.0)
     rbvmomi (1.8.2)
@@ -290,7 +289,7 @@ GEM
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 3.0)
       netrc (~> 0.7)
-    rubyntlm (0.6.0)
+    rubyntlm (0.6.1)
     slop (3.6.0)
     spring (1.7.2)
     spring-watcher-listen (2.0.0)
@@ -304,7 +303,7 @@ GEM
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
     sqlite3 (1.3.11)
-    stomp (1.4.1)
+    stomp (1.4.3)
     systemu (2.6.5)
     thor (0.19.1)
     thread_safe (0.3.5)

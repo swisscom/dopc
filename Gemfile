@@ -11,10 +11,10 @@ gem 'dop_common',
   :tag => 'master'
 gem 'dopv',
   :git => 'https://gitlab.swisscloud.io/clu-dop/dopv.git',
-  :tag => 'v0.3.0'
+  :tag => 'master'
 gem 'dopi',
   :git => 'https://gitlab.swisscloud.io/clu-dop/dopi.git',
-  :tag => 'v0.13.0'
+  :tag => 'master'
 
 group :development, :test do
   gem 'byebug', platform: :mri
