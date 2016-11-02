@@ -11,6 +11,8 @@ See `Gemfile` for ruby version and gems.
 1. Set up Ruby environmnent: RVM, Bundler, etc.
 1. Setup database: `bundle exec rake db:migrate`
 1. Start server: `bundle exec bin/rails s`
+1. Start Delayed::Job to start processing plan executions: `bundle exec bin/delayed_job start`
+1. Schedule old job executions: `bundle exec rake dopc:schedule`
 
 ## Configuration
 
@@ -283,7 +285,14 @@ If request body has errors.
 
 ## Implementation
 
-TODO
+* Plans are executed in background with Delayed::Job.
+* Scheduling plan executions is done everytime a new execution is added or an
+  execution finishes.
+* When restarting scheduling must be done manually with the `dopc:schedule`
+  rake task.
+* Plans are managed with the plan store from dop_common, nothing is stored in
+  the local database. Plans and executions are connected only by the plan name
+  (no IDs).
 
 ## Caveats
 
@@ -294,8 +303,10 @@ TODO
 
 * Ensure calling DOPi/DOPv from DOPc works exactly the same as calling them
   directly (command line args, config files, logging, etc.)
-* Check log clutter and verbose execution during tests
-* How to notice/recover when workers fail and stop
+* Running DOPv: Where to put disk DB file?
+* Running DOPv currently fails
+* Running DOPi currently fails
+* Test recovering failed workers
 
 ## Authors
 
