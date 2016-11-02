@@ -257,6 +257,36 @@ If the specified execution was not found.
 | --- | --- | --- | --- |
 | String | error | Error message | yes |
 
+#### DELETE /v1/executions/{id}
+
+Remove an execution.
+
+**Path Parameters**
+
+| Type | Parameter | Description | Required |
+| --- | --- | --- | --- |
+| Integer | id | ID of an execution | yes |
+
+**200 OK**
+
+Returns the removed execution. See GET for the response body format.
+
+**404 Not Found**
+
+If the specified execution was not found.
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | error | Error message | yes |
+
+**409 Conflict**
+
+If the specified execution is running and can not be removed.
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | error | Error message | yes |
+
 #### POST /v1/executions
 
 Execute a plan. Creates a job to execute the plan in the background.
@@ -283,6 +313,29 @@ If request body has errors.
 | --- | --- | --- | --- |
 | String | error | Error message | yes |
 
+#### DELETE /v1/executions
+
+Remove executions.
+
+**Request Body**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | plan | If specified then only executions of this plan are removed | no |
+| Array of strings | statuses | Executions with a status matching any string of this list are removed | yes |
+
+**200 OK**
+
+Returns the removed executions. See GET operation for individual executions for the response body format.
+
+**422 Unprocessable Entity**
+
+If any of the specified statuses is invalid.
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | error | Error message | yes |
+
 ## Implementation
 
 * Plans are executed in background with Delayed::Job.
@@ -293,6 +346,7 @@ If request body has errors.
 * Plans are managed with the plan store from dop_common, nothing is stored in
   the local database. Plans and executions are connected only by the plan name
   (no IDs).
+* Only one execution for a specific plan can be running or queued at a time.
 
 ## Caveats
 

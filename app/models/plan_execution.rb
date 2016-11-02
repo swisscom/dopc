@@ -27,6 +27,12 @@ class PlanExecution < ApplicationRecord
     end
   end
 
+  def self.remove_statuses
+    statuses = self.statuses.keys
+    statuses.delete('running')
+    statuses
+  end
+
   def run
     self.status_running!
     log.info("Execution #{self.id}") {'started'}

@@ -9,7 +9,9 @@ Rails.application.routes.draw do
           get 'versions'
         end
       end
-      resources :executions
+      delete '/executions', to: 'executions#destroy_multiple'
+      resources :executions do
+      end
     end
   end
 end
