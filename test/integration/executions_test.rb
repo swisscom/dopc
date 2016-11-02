@@ -48,4 +48,17 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     assert_equal nil, execution
   end
 
+  test 'remove execution' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'setup'}, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    id = data['id']
+    delete "/api/v1/executions/#{id}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal id, data['id']
+    assert_equal 'hello_world', data['plan']
+    assert_equal 'setup', data['task']
+  end
+
 end

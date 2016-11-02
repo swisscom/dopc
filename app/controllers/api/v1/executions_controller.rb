@@ -32,17 +32,18 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
   end
 
   def destroy
+    execution = nil
     PlanExecution.transaction do
-    execution = PlanExecution.find_by_id(params[:id])
-    unless execution
-      render json: {error: 'Execution not found'}, status: :not_found
-      return
-    end
-    if execution.status_running?
-      render json: {error: 'Execution is already running'}, status: :conflict
-      return
-    end
-    execution.destroy
+      execution = PlanExecution.find_by_id(params[:id])
+      unless execution
+        render json: {error: 'Execution not found'}, status: :not_found
+        return
+      end
+      if execution.status_running?
+        render json: {error: 'Execution is already running'}, status: :conflict
+        return
+      end
+      execution.destroy
     end
     render json: execution.to_hash
   end
