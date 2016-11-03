@@ -61,4 +61,42 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     assert_equal 'setup', data['task']
   end
 
+  test 'remove non-existent execution' do
+    delete "/api/v1/executions/1", as: :json
+    assert_response :not_found
+  end
+
+  test 'remove all executions' do
+    ids = []
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'setup'}, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    ids << data['id']
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'setup'}, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    ids << data['id']
+    delete "/api/v1/executions", params: {statuses: ['new']}, as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_empty data['executions'].collect{|e| e['id']} - ids
+  end
+
+  test 'no execution found to remove' do
+    delete "/api/v1/executions", params: {statuses: ['done']}, as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_empty data['executions']
+  end
+
+  test 'can not remove running executions' do
+    delete "/api/v1/executions", params: {statuses: ['running']}, as: :json
+    assert_response :unprocessable_entity
+  end
+
+  test 'invalid statuses' do
+    delete "/api/v1/executions", params: {statuses: ['failed', 'invalid']}, as: :json
+    assert_response :unprocessable_entity
+  end
+
 end
