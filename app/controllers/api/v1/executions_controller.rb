@@ -45,6 +45,7 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
       end
       execution.destroy
     end
+    PlanExecution.schedule
     render json: execution.to_hash
   end
 
@@ -66,6 +67,7 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
         destroyed = PlanExecution.where(status: statuses).destroy_all
       end
     end
+    PlanExecution.schedule
     render json: {executions: destroyed.collect{|e| e.to_hash}}
   end
 
