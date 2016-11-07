@@ -10,8 +10,8 @@ GIT
 
 GIT
   remote: https://gitlab.swisscloud.io/clu-dop/dopi.git
-  revision: f860bc611207ede0593898f7901d8d408f5850de
-  tag: master
+  revision: bdfc191583240bce78391a2c739b9e6ffb842cf0
+  tag: feature/new_plan_cache
   specs:
     dopi (0.13.1)
       curses (~> 1)

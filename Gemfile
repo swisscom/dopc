@@ -14,7 +14,7 @@ gem 'dopv',
   :tag => 'master'
 gem 'dopi',
   :git => 'https://gitlab.swisscloud.io/clu-dop/dopi.git',
-  :tag => 'master'
+  :tag => 'feature/new_plan_cache'
 
 group :development, :test do
   gem 'byebug', platform: :mri

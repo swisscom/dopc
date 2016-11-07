@@ -112,10 +112,9 @@ class PlanExecution < ApplicationRecord
 
   def dopi_run
     log.info("Execution #{self.id}") {'running DOPi'}
-    plan = Dopi.load_plan(self[:plan])
     options = {}
-    self[:stepset] ? options.merge!({step_set: self[:stepset]}) :
-    Dopi.run_plan(plan, options)
+    options.merge!({step_set: self[:stepset]}) if self[:stepset]
+    Dopi.run(self[:plan], options)
   end
 
 end
