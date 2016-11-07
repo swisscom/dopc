@@ -19,7 +19,7 @@ class ActiveSupport::TestCase
     DopCommon::PlanStore.unstub(:new)
     plancache = DopCommon::PlanStore.new(@cachedir)
     DopCommon::PlanStore.stubs(:new).returns(plancache)
-    Dopi.configuration.plan_cache_dir = @cachedir
+    Dopi.configuration.plan_store_dir = @cachedir
   end
 
   def mock_dopv
@@ -61,7 +61,7 @@ class ActiveSupport::TestCase
   end
 
   def add_plan(name)
-    cache = DopCommon::PlanStore.new(Dopi.configuration.plan_cache_dir)
+    cache = DopCommon::PlanStore.new(@cachedir)
     cache.add(plan_file(name))
   end
 

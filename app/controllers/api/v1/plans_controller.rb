@@ -78,7 +78,7 @@ class Api::V1::PlansController < Api::V1::ApiController
   private
 
   def cache
-    DopCommon::PlanStore.new(Dopi.configuration.plan_cache_dir)
+    DopCommon::PlanStore.new(Dopi.configuration.plan_store_dir)
   end
 
 end
