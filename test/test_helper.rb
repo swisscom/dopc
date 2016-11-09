@@ -30,18 +30,20 @@ class ActiveSupport::TestCase
   end
 
   def mock_dopv_fail
+    Dopv.unstub(:load_data_volumes_db)
+    Dopv.stubs(:load_data_volumes_db).returns(nil)
     Dopv.unstub(:run_plan)
     Dopv.stubs(:run_plan).raises(Exception, 'Testing error')
   end
 
   def mock_dopi
-    Dopi.unstub(:run_plan)
-    Dopi.stubs(:run_plan).returns(nil)
+    Dopi.unstub(:run)
+    Dopi.stubs(:run).returns(nil)
   end
 
   def mock_dopi_fail
-    Dopi.unstub(:run_plan)
-    Dopi.stubs(:run_plan).raises(Exception, 'Testing error')
+    Dopi.unstub(:run)
+    Dopi.stubs(:run).raises(Exception, 'Testing error')
   end
 
   def plan_file(name)

@@ -99,4 +99,138 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  test 'run a plan' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'run'}, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    id = data['id']
+    get "/api/v1/executions/#{id}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal 'queued', data['status']
+    successes, failures = Delayed::Worker.new.work_off
+    assert_equal 1, successes
+    assert_equal 0, failures
+    get "/api/v1/executions/#{id}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal 'done', data['status']
+  end
+
+  test 'deploy a plan' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'deploy'}, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    id = data['id']
+    get "/api/v1/executions/#{id}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal 'queued', data['status']
+    successes, failures = Delayed::Worker.new.work_off
+    assert_equal 1, successes
+    assert_equal 0, failures
+    get "/api/v1/executions/#{id}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal 'done', data['status']
+  end
+
+  test 'fail to run a plan' do
+    mock_dopi_fail
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'run'}, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    id = data['id']
+    get "/api/v1/executions/#{id}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal 'queued', data['status']
+    successes, failures = Delayed::Worker.new.work_off
+    assert_equal 1, successes
+    assert_equal 0, failures
+    get "/api/v1/executions/#{id}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal 'failed', data['status']
+  end
+
+  test 'fail to deploy a plan' do
+    mock_dopv_fail
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'deploy'}, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    id = data['id']
+    get "/api/v1/executions/#{id}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal 'queued', data['status']
+    successes, failures = Delayed::Worker.new.work_off
+    assert_equal 1, successes
+    assert_equal 0, failures
+    get "/api/v1/executions/#{id}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal 'failed', data['status']
+  end
+
+  test 'run multiple executions' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'setup'}, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    id1 = data['id']
+    get "/api/v1/executions/#{id1}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal 'queued', data['status']
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'setup'}, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    id2 = data['id']
+    get "/api/v1/executions/#{id2}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal 'new', data['status']
+    successes, failures = Delayed::Worker.new.work_off
+    assert_equal 2, successes
+    assert_equal 0, failures
+    get "/api/v1/executions/#{id1}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal 'done', data['status']
+    get "/api/v1/executions/#{id2}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal 'done', data['status']
+  end
+
+  test 'clear an execution' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'setup'}, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    id = data['id']
+    delete "/api/v1/executions/#{id}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal id, data['id']
+  end
+
+  test 'clear multiple executions' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'setup'}, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    id1 = data['id']
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'setup'}, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    id2 = data['id']
+    delete '/api/v1/executions', params: {statuses: ['new', 'queued']}, as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal 2, data['executions'].size
+    get '/api/v1/executions', as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_empty data['executions']
+  end
+
 end

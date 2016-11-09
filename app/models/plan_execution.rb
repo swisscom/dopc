@@ -54,7 +54,7 @@ class PlanExecution < ApplicationRecord
     end
     self.status_done!
     log.info("Execution #{self.id}") {'done'}
-  rescue => e
+  rescue Exception => e
     self.status_failed!
     self.update(log: "Error while executing the plan")
     log.error("Execution #{self.id}") {"failed: #{e.message}: #{e.backtrace.join('\n')}"}
@@ -69,7 +69,7 @@ class PlanExecution < ApplicationRecord
   private
 
   def cache
-    DopCommon::PlanStore.new(Dopi.configuration.plan_cache_dir)
+    DopCommon::PlanStore.new(Dopi.configuration.plan_store_dir)
   end
 
   def log
