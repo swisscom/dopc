@@ -1,21 +1,21 @@
 GIT
   remote: https://gitlab.swisscloud.io/clu-dop/dop_common.git
-  revision: 4900cde183523c1038b294c61e850e386f5588ca
-  tag: master
+  revision: b5a29ef1d6b55fb96403fb5ea4ad5a36b56e5ec0
+  tag: v0.9.0
   specs:
-    dop_common (0.8.1)
+    dop_common (0.9.0)
       hashdiff
       lockfile
       rb-inotify
 
 GIT
   remote: https://gitlab.swisscloud.io/clu-dop/dopi.git
-  revision: bdfc191583240bce78391a2c739b9e6ffb842cf0
-  tag: feature/new_plan_cache
+  revision: 2d169ab48ab273fc904549ce5e5b9728ac6a6175
+  tag: v0.14.0
   specs:
-    dopi (0.13.1)
+    dopi (0.14.0)
       curses (~> 1)
-      dop_common (= 0.8.1)
+      dop_common (= 0.9.0)
       gli (~> 2)
       hiera (~> 3)
       logger-colors (~> 1)
