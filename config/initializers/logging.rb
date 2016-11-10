@@ -1,9 +1,10 @@
 require 'dop_common'
+require 'dopi'
 
-if Rails.env.test?
-  DopCommon.logger = Logger.new('/dev/null')
-else
-  formatter = Rails.logger.formatter
-  DopCommon.logger = Rails.logger
-  Rails.logger.formatter = formatter
-end
+logger = Rails.logger
+formatter = logger.formatter
+DopCommon.logger = logger
+Dopi.logger = logger
+Dopv.logger = logger
+# Restore formatter
+logger.formatter = formatter

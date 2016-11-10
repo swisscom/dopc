@@ -40,7 +40,7 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
         return
       end
       if execution.status_running?
-        render json: {error: 'Execution is already running'}, status: :conflict
+        render json: {error: 'Can not remove a running execution'}, status: :conflict
         return
       end
       execution.destroy

@@ -20,6 +20,8 @@ class ActiveSupport::TestCase
     plancache = DopCommon::PlanStore.new(@cachedir)
     DopCommon::PlanStore.stubs(:new).returns(plancache)
     Dopi.configuration.plan_store_dir = @cachedir
+    Dopi.configuration.log_dir = "#{@cachedir}/log"
+    Dopi.instance_variable_set('@plan_store', nil)
   end
 
   def mock_dopv
@@ -34,16 +36,6 @@ class ActiveSupport::TestCase
     Dopv.stubs(:load_data_volumes_db).returns(nil)
     Dopv.unstub(:run_plan)
     Dopv.stubs(:run_plan).raises(Exception, 'Testing error')
-  end
-
-  def mock_dopi
-    Dopi.unstub(:run)
-    Dopi.stubs(:run).returns(nil)
-  end
-
-  def mock_dopi_fail
-    Dopi.unstub(:run)
-    Dopi.stubs(:run).raises(Exception, 'Testing error')
   end
 
   def plan_file(name)

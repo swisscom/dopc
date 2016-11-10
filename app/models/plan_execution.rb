@@ -114,6 +114,7 @@ class PlanExecution < ApplicationRecord
     log.info("Execution #{self.id}") {'running DOPi'}
     options = {}
     options.merge!({step_set: self[:stepset]}) if self[:stepset]
+    options.merge!({noop: true}) if Rails.env.test?
     Dopi.run(self[:plan], options)
   end
 

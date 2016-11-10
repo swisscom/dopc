@@ -44,12 +44,20 @@ class Api::V1::PlansController < Api::V1::ApiController
   def update_content
     begin
       hash = YAML.load(Base64.decode64(params[:content]))
+      plan = DopCommon::Plan.new(hash)
     rescue Exception => e
       render json: {error: "Failed to load content: #{e}"}, status: :unprocessable_entity
       return
     end
+    name = nil
     begin
-      name = cache.update(hash)
+      PlanExecution.transaction do
+        if not PlanExecution.where(status: :running, plan: plan.name).empty?
+          render json: {error: "Can not update a plan that has running executions"}, status: :conflict
+        end
+        name = cache.update(hash)
+        Dopi.update_state(name, {:clear => true})
+      end
     rescue StandardError => e
       render json: {error: "Failed to update plan: #{e}"}, status: :bad_request
       return
