@@ -212,6 +212,34 @@ If the specified plan was not found.
 | --- | --- | --- | --- |
 | String | error | Error message | yes |
 
+#### PUT /v1/plans/{name}/reset
+
+Reset the state of a plan.
+
+**Request Body**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| Boolean | force | Force the state reset | yes |
+
+**200 Success**
+
+**422 Unprocessable Entity**
+
+If the request is invalid.
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | error | Error message | yes |
+
+**404 Not Found**
+
+If the plan was not found.
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | error | Error message | yes |
+
 #### GET /v1/executions
 
 Get list of all executions.

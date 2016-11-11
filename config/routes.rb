@@ -7,11 +7,11 @@ Rails.application.routes.draw do
       resources :plans do
         member do
           get 'versions'
+          put 'reset'
         end
       end
       delete '/executions', to: 'executions#destroy_multiple'
-      resources :executions do
-      end
+      resources :executions
     end
   end
 end

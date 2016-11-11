@@ -66,11 +66,9 @@ class Api::V1::PlansController < Api::V1::ApiController
   end
 
   def destroy
-    begin
-      render json: {name: cache.remove(params[:id])}
-    rescue StandardError => e
-      render json: {error: e}, status: :not_found
-    end
+    render json: {name: cache.remove(params[:id])}
+  rescue StandardError => e
+    render json: {error: e}, status: :not_found
   end
 
   def versions
@@ -81,6 +79,20 @@ class Api::V1::PlansController < Api::V1::ApiController
       return
     end
     render json: {versions: versions}
+  end
+
+  def reset
+    unless params[:force].is_a?(TrueClass) or params[:force].is_a?(FalseClass)
+      render json: {error: "Force must be true/false"}, status: :unprocessable_entity
+      return
+    end
+    begin
+      cache.get_plan(params[:id])
+    rescue StandardError => e
+      render json: {error: "Plan not found: #{e}"}, status: :not_found
+      return
+    end
+    render json: {name: Dopi.reset(params[:id], params[:force])}
   end
 
   private
