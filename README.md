@@ -125,7 +125,7 @@ If the specified plan was not found.
 
 #### POST /v1/plans
 
-Add a new plan.
+Add a new plan. The plan name is taken from the content.
 
 **Request Body**
 
@@ -417,11 +417,8 @@ If any of the specified statuses is invalid.
 
 ## Todo
 
-* Ensure calling DOPi/DOPv from DOPc works exactly the same as calling them
-  directly (command line args, config files, logging, etc.)
+* Ensure same config as CLI when calling DOPi
 * Running DOPv: Where to put disk DB file?
-* Running DOPv currently fails
-* Running DOPi currently fails
 * Test recovering failed workers
 
 ## Authors
