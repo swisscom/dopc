@@ -216,6 +216,12 @@ If the specified plan was not found.
 
 Reset the state of a plan.
 
+**Path Parameters**
+
+| Type | Parameter | Description | Required |
+| --- | --- | --- | --- |
+| String | name | Name of the plan | yes |
+
 **Request Body**
 
 | Type | Property | Description | Required |
@@ -224,6 +230,10 @@ Reset the state of a plan.
 
 **200 Success**
 
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | name | Name of the plan that was reset | yes |
+
 **422 Unprocessable Entity**
 
 If the request is invalid.
@@ -231,6 +241,30 @@ If the request is invalid.
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
 | String | error | Error message | yes |
+
+**404 Not Found**
+
+If the plan was not found.
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | error | Error message | yes |
+
+#### GET /v1/plans/{name}/state
+
+Get current DOPi state of a plan.
+
+**Path Parameters**
+
+| Type | Parameter | Description | Required |
+| --- | --- | --- | --- |
+| String | name | Name of the plan | yes |
+
+**200 Success**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | state | State of the plan, newline formatted | yes |
 
 **404 Not Found**
 

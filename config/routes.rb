@@ -8,6 +8,7 @@ Rails.application.routes.draw do
         member do
           get 'versions'
           put 'reset'
+          get 'state'
         end
       end
       delete '/executions', to: 'executions#destroy_multiple'

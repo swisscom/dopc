@@ -163,24 +163,39 @@ class PlansTest < ActionDispatch::IntegrationTest
     post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
     data = JSON.parse(@response.body)
     assert_response :created
+    assert_equal 'hello_world', data['name']
     put '/api/v1/plans/hello_world/reset', params: {force: true}, as: :json
     data = JSON.parse(@response.body)
     assert_response :success
+    assert_equal 'hello_world', data['name']
     put '/api/v1/plans/hello_world/reset', params: {force: false}, as: :json
     data = JSON.parse(@response.body)
     assert_response :success
+    assert_equal 'hello_world', data['name']
   end
 
   test 'invalid reset' do
     post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
     data = JSON.parse(@response.body)
     assert_response :created
+    assert_equal 'hello_world', data['name']
     put '/api/v1/plans/hello_worlds/reset', params: {force: false}, as: :json
     data = JSON.parse(@response.body)
     assert_response :not_found
     put '/api/v1/plans/hello_world/reset', params: {force: 1}, as: :json
     data = JSON.parse(@response.body)
     assert_response :unprocessable_entity
+  end
+
+  test 'show state of plan' do
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :created
+    assert_equal 'hello_world', data['name']
+    get '/api/v1/plans/hello_world/state', params: {force: false}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :success
+    assert_match /ready/, data['state']
   end
 
 end

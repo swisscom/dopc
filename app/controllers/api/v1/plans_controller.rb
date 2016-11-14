@@ -1,7 +1,7 @@
 require 'base64'
 require 'yaml'
 require 'dop_common'
-require 'dopi'
+require 'dopi/cli/log'
 
 class Api::V1::PlansController < Api::V1::ApiController
 
@@ -92,7 +92,18 @@ class Api::V1::PlansController < Api::V1::ApiController
       render json: {error: "Plan not found: #{e}"}, status: :not_found
       return
     end
-    render json: {name: Dopi.reset(params[:id], params[:force])}
+    Dopi.reset(params[:id], params[:force])
+    render json: {name: params[:id]}
+  end
+
+  def state
+    begin
+      cache.get_plan(params[:id])
+    rescue StandardError => e
+      render json: {error: "Plan not found: #{e}"}, status: :not_found
+      return
+    end
+    render json: {state: Dopi::Cli.state(params[:id])}
   end
 
   private
