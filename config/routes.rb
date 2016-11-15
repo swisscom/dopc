@@ -12,7 +12,11 @@ Rails.application.routes.draw do
         end
       end
       delete '/executions', to: 'executions#destroy_multiple'
-      resources :executions
+      resources :executions do
+        member do
+          get 'log'
+        end
+      end
     end
   end
 end

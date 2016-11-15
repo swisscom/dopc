@@ -243,4 +243,17 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     assert_equal 'done', data['status']
   end
 
+  test 'get log of execution' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'setup'}, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    id = data['id']
+    Delayed::Worker.new.work_off
+    get "/api/v1/executions/#{id}/log", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_match /Execution started/, data['log']
+    assert_match /Execution done/, data['log']
+  end
+
 end

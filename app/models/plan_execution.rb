@@ -1,9 +1,11 @@
 require 'dop_common'
 require 'dopv'
 require 'dopi'
+require 'log'
 
 require 'tempfile'
 require 'fileutils'
+require 'stringio'
 
 class PlanExecution < ApplicationRecord
 
@@ -37,33 +39,37 @@ class PlanExecution < ApplicationRecord
   end
 
   def run
+    buf = StringIO.new
+    log = Logger.new(buf)
+    Log.set_loggers(log)
     self.status_running!
-    log.info("Execution #{self.id}") {'started'}
+    log.info('Execution started')
     case self[:task]
     when 'setup'
-      dopv_deploy
-      dopi_run
+      dopv_deploy(log)
+      dopi_run(log)
     when 'deploy'
-      dopv_deploy
+      dopv_deploy(log)
     when 'run'
-      dopi_run
+      dopi_run(log)
     when 'undeploy'
-      dopv_undeploy
+      dopv_undeploy(log)
     else
       raise "Invalid task: #{self[:task]}"
     end
     self.status_done!
-    log.info("Execution #{self.id}") {'done'}
+    log.info('Execution done')
   rescue Exception => e
     self.status_failed!
-    self.update(log: "Error while executing the plan")
-    log.error("Execution #{self.id}") {"failed: #{e.message}: #{e.backtrace.join('\n')}"}
+    log.error("Execution failed: #{e.message}: #{e.backtrace.join('\n')}")
   ensure
+    self.update(log: buf.string)
+    Log.set_loggers(Rails.logger, true)
     self.class.schedule
   end
 
   def to_hash
-    {id: self[:id], plan: self[:plan], task: self[:task], stepset: self[:stepset], status: self[:status], log: self[:log]}
+    {id: self[:id], plan: self[:plan], task: self[:task], stepset: self[:stepset], status: self[:status], created_at: self[:created_at], updated_at: self[:updated_at]}
   end
 
   private
@@ -72,12 +78,8 @@ class PlanExecution < ApplicationRecord
     DopCommon::PlanStore.new(Dopi.configuration.plan_store_dir)
   end
 
-  def log
-    Delayed::Worker.logger
-  end
-
-  def dopv_deploy
-    log.info("Execution #{self.id}") {'deploying with DOPv'}
+  def dopv_deploy(log)
+    log.info('Deploying with DOPv')
     Dopv.logger = log
     plan_content = cache.get_plan_yaml(self[:plan])
     tmp = Tempfile.new('dopc')
@@ -93,8 +95,8 @@ class PlanExecution < ApplicationRecord
     end
   end
 
-  def dopv_undeploy
-    log.info("Execution #{self.id}") {'undeploying with DOPv'}
+  def dopv_undeploy(log)
+    log.info('Undeploying with DOPv')
     Dopv.logger = log
     plan_content = cache.get_plan_yaml(self[:plan])
     tmp = Tempfile.new('dopc')
@@ -110,8 +112,8 @@ class PlanExecution < ApplicationRecord
     end
   end
 
-  def dopi_run
-    log.info("Execution #{self.id}") {'running DOPi'}
+  def dopi_run(log)
+    log.info('Running DOPi')
     options = {}
     options.merge!({step_set: self[:stepset]}) if self[:stepset]
     options.merge!({noop: true}) if Rails.env.test?

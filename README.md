@@ -288,7 +288,8 @@ Get list of all executions.
 | String | &nbsp;&nbsp;- task | Task to execute | yes |
 | String | &nbsp;&nbsp;- stepset | Stepset to execute instead of default | yes |
 | String | &nbsp;&nbsp;- status | Execution status | yes |
-| String | &nbsp;&nbsp;- log | Execution log, mostly only in error case | yes |
+| String | &nbsp;&nbsp;- created_at | Timestamp when the execution was created | yes |
+| String | &nbsp;&nbsp;- updated_at | Timestamp when the execution was last updated | yes |
 
 #### GET /v1/executions/{id}
 
@@ -310,6 +311,30 @@ Get an execution.
 | String | stepset | Stepset to execute instead of default | yes |
 | String | status | Execution status | yes |
 | String | log | Execution log, mostly only in error case | yes |
+
+**404 Not Found**
+
+If the specified execution was not found.
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | error | Error message | yes |
+
+#### GET /v1/executions/{id}/log
+
+Get the log of an execution.
+
+**Path Parameters**
+
+| Type | Parameter | Description | Required |
+| --- | --- | --- | --- |
+| Integer | id | ID of an execution | yes |
+
+**200 OK**
+
+| Type | Property | Description | Required |
+| --- | --- | --- | --- |
+| String | log | Log of the execution | yes |
 
 **404 Not Found**
 
@@ -412,6 +437,9 @@ If any of the specified statuses is invalid.
 
 ## Caveats
 
+* Running DOPi causes the corresponding delayed job worker to not shut down
+  when stopping delayed job and it gets killed (issue with signal handling in
+  DOPi?)
 * Service is not protected by any sort of authentication or authorization, this
   is left to the setup (e.g. basic auth with Apache httpd).
 

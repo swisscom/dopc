@@ -71,4 +71,13 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
     render json: {executions: destroyed.collect{|e| e.to_hash}}
   end
 
+  def log
+    execution = PlanExecution.find_by_id(params[:id])
+    if execution
+      render json: {log: execution.log}
+    else
+      render json: {error: 'Execution not found'}, status: :not_found
+    end
+  end
+
 end
