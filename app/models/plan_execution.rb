@@ -117,7 +117,9 @@ class PlanExecution < ApplicationRecord
     options = {}
     options.merge!({step_set: self[:stepset]}) if self[:stepset]
     options.merge!({noop: true}) if Rails.env.test?
-    Dopi.run(self[:plan], options)
+    Dopi.run(self[:plan], options) {
+      # Avoid installing signal handler by passing block
+    }
   end
 
 end

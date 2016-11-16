@@ -437,9 +437,6 @@ If any of the specified statuses is invalid.
 
 ## Caveats
 
-* Running DOPi causes the corresponding delayed job worker to not shut down
-  when stopping delayed job and it gets killed (issue with signal handling in
-  DOPi?)
 * Service is not protected by any sort of authentication or authorization, this
   is left to the setup (e.g. basic auth with Apache httpd).
 
