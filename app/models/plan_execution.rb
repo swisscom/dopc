@@ -6,6 +6,7 @@ require 'log'
 require 'tempfile'
 require 'fileutils'
 require 'stringio'
+require 'yaml'
 
 class PlanExecution < ApplicationRecord
 
@@ -80,7 +81,6 @@ class PlanExecution < ApplicationRecord
 
   def dopv_deploy(log)
     log.info('Deploying with DOPv')
-    Dopv.logger = log
     plan_content = cache.get_plan_yaml(self[:plan])
     tmp = Tempfile.new('dopc')
     begin
@@ -97,7 +97,6 @@ class PlanExecution < ApplicationRecord
 
   def dopv_undeploy(log)
     log.info('Undeploying with DOPv')
-    Dopv.logger = log
     plan_content = cache.get_plan_yaml(self[:plan])
     tmp = Tempfile.new('dopc')
     begin
@@ -116,7 +115,16 @@ class PlanExecution < ApplicationRecord
     log.info('Running DOPi')
     options = {}
     options.merge!({step_set: self[:stepset]}) if self[:stepset]
-    options.merge!({noop: true}) if Rails.env.test?
+    if Rails.env.test?
+      options.merge!({noop: true}) if Rails.env.test?
+    else
+      config_file = Dopi.configuration.config_file
+      if config_file and File.file?(config_file) and !Rails.env.test?
+        config = YAML::load_file(config_file)
+        Dopi.configure = config
+        log.debug("Loaded DOPi configuration from #{config_file}")
+      end
+    end
     Dopi.run(self[:plan], options) {
       # Avoid installing signal handler by passing block
     }

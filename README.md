@@ -434,6 +434,9 @@ If any of the specified statuses is invalid.
   the local database. Plans and executions are connected only by the plan name
   (no IDs).
 * Only one execution for a specific plan can be running or queued at a time.
+* Before calling DOPi its configuration is loaded from file (usually
+  `~/.dop/dopi.conf`, except when the Rails environment is `test`, then also
+  all executions are started with the `noop` option.
 
 ## Caveats
 
@@ -442,7 +445,6 @@ If any of the specified statuses is invalid.
 
 ## Todo
 
-* Ensure same config as CLI when calling DOPi
 * Running DOPv: Where to put disk DB file?
 * Test recovering failed workers
 
