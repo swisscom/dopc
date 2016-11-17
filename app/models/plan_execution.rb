@@ -93,15 +93,11 @@ class PlanExecution < ApplicationRecord
     log.info('Running DOPi')
     options = {}
     options.merge!({step_set: self[:stepset]}) if self[:stepset]
-    if Rails.env.test?
-      options.merge!({noop: true}) if Rails.env.test?
-    else
-      config_file = Dopi.configuration.config_file
-      if config_file and File.file?(config_file) and !Rails.env.test?
-        config = YAML::load_file(config_file)
-        Dopi.configure = config
-        log.debug("Loaded DOPi configuration from #{config_file}")
-      end
+    config_file = Dopi.configuration.config_file
+    if config_file and File.file?(config_file) and !Rails.env.test?
+      config = YAML::load_file(config_file)
+      Dopi.configure = config
+      log.debug("Loaded DOPi configuration from #{config_file}")
     end
     Dopi.run(self[:plan], options) {
       # Avoid installing signal handler by passing block

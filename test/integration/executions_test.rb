@@ -130,22 +130,19 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     assert_equal 'done', data['status']
   end
 
-  # How to make a DOPi run fail? Can use a valid plan that fails in noop mode?
-  #test 'fail to run a plan' do
-  #  post '/api/v1/executions', params: {plan: 'hello_world', task: 'run'}, as: :json
-  #  assert_response :created
-  #  data = JSON.parse(@response.body)
-  #  id = data['id']
-  #  get "/api/v1/executions/#{id}", as: :json
-  #  assert_response :success
-  #  data = JSON.parse(@response.body)
-  #  assert_equal 'queued', data['status']
-  #  Delayed::Worker.new.work_off
-  #  get "/api/v1/executions/#{id}", as: :json
-  #  assert_response :success
-  #  data = JSON.parse(@response.body)
-  #  assert_equal 'failed', data['status']
-  #end
+  test 'plan run fails' do
+    remove_plan('hello_world')
+    add_plan('fail')
+    post '/api/v1/executions', params: {plan: 'fail', task: 'run'}, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    id = data['id']
+    Delayed::Worker.new.work_off
+    get "/api/v1/executions/#{id}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal 'failed', data['status']
+  end
 
   test 'fail to deploy a plan' do
     mock_dopv_fail

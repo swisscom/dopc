@@ -59,4 +59,9 @@ class ActiveSupport::TestCase
     cache.add(plan_file(name))
   end
 
+  def remove_plan(name)
+    cache = DopCommon::PlanStore.new(@cachedir)
+    cache.remove(name)
+  end
+
 end

@@ -1,4 +1,4 @@
-name: 'hello_world'
+name: 'fail'
 max_in_flight: 1
 
 infrastructures:
@@ -16,9 +16,8 @@ credentials:
     password: 'root'
 
 steps:
-  - name: 'write hello world'
+  - name: 'fail'
     nodes: 'all'
     command:
       plugin: 'custom'
-      exec: 'echo'
-      arguments: '"hello world"'
+      exec: 'fail'
