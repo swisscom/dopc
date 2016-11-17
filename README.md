@@ -13,7 +13,7 @@ See `Gemfile` for ruby version and gems.
    example) and set the authentication token in the config (use e.g. `openssl
    rand -base64 32` for random token)
 1. Setup database: `bundle exec rake db:migrate`
-1. Start server: `bundle exec bin/rails s`
+1. Start server: `bundle exec rails s`
 1. Start Delayed::Job to start processing plan executions: `bundle exec bin/delayed_job start`
 1. Schedule old job executions: `bundle exec rake dopc:schedule`
 
