@@ -10,7 +10,8 @@ See `Gemfile` for ruby version and gems.
 
 1. Set up Ruby environmnent: RVM, Bundler, etc.
 1. Create configuration `config/dopc.yml` (see `config/dopc.yml.example` for an
-   example)
+   example) and set the authentication token in the config (use e.g. `openssl
+   rand -base64 32` for random token)
 1. Setup database: `bundle exec rake db:migrate`
 1. Start server: `bundle exec bin/rails s`
 1. Start Delayed::Job to start processing plan executions: `bundle exec bin/delayed_job start`
