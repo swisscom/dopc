@@ -195,7 +195,39 @@ class PlansTest < ActionDispatch::IntegrationTest
     get '/api/v1/plans/hello_world/state', params: {force: false}, as: :json
     data = JSON.parse(@response.body)
     assert_response :success
-    assert_match /ready/, data['state']
+    assert_match /\[ready\]/, data['state']
+  end
+
+  test 'plan state is cleared on update' do
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :created
+    assert_equal 'hello_world', data['name']
+    get '/api/v1/plans/hello_world/state', params: {force: false}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :success
+    assert_match /\[ready\]/, data['state']
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'run'}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :created
+    id = data['id']
+    Delayed::Worker.new.work_off
+    get "/api/v1/executions/#{id}", as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal 'done', data['status']
+    get '/api/v1/plans/hello_world/state', params: {force: false}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :success
+    assert_match /\[done\]/, data['state']
+    put '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :success
+    assert_equal 'hello_world', data['name']
+    get '/api/v1/plans/hello_world/state', params: {force: false}, as: :json
+    data = JSON.parse(@response.body)
+    assert_response :success
+    assert_match /\[ready\]/, data['state']
   end
 
 end
