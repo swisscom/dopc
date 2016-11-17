@@ -18,5 +18,5 @@
 
 /.ruby-gemset
 /cache
-/config/initializers/settings/02_local.rb
 /db/*.sqlite3
+/config/dopc.yml

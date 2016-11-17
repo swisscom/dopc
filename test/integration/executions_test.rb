@@ -8,6 +8,7 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     setup_tmp
     mock_cache
     mock_dopv
+    setup_auth
     add_plan('hello_world')
   end
 

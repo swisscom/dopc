@@ -1,10 +1,11 @@
 class Api::V1::ApiController < ActionController::API
 
   include ActionController::MimeResponds
+  include ActionController::HttpAuthentication::Token::ControllerMethods 
 
   wrap_parameters false
 
-  before_action :accept_json, :json_content
+  before_action :accept_json, :json_content, :authenticate
 
   private
 
@@ -18,6 +19,16 @@ class Api::V1::ApiController < ActionController::API
     if request.content_type && (request.content_type != 'application/json')
       render json: {error: 'Client set content type to non-JSON format'}, status: :unsupported_media_type
     end
+  end
+
+  def authenticate
+    authenticate_or_request_with_http_token do |token, options|
+      token == get_auth_token
+    end
+  end
+
+  def get_auth_token
+    APP_CONFIG['auth_token']
   end
 
 end

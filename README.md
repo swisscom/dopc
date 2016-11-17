@@ -9,6 +9,8 @@ See `Gemfile` for ruby version and gems.
 ## Quickstart
 
 1. Set up Ruby environmnent: RVM, Bundler, etc.
+1. Create configuration `config/dopc.yml` (see `config/dopc.yml.example` for an
+   example)
 1. Setup database: `bundle exec rake db:migrate`
 1. Start server: `bundle exec bin/rails s`
 1. Start Delayed::Job to start processing plan executions: `bundle exec bin/delayed_job start`
@@ -16,11 +18,14 @@ See `Gemfile` for ruby version and gems.
 
 ## Configuration
 
-DOPc will use configuration settings from DOPi/DOPv wherever possible.
+DOPc will use configuration settings from DOPi/DOPv wherever possible. When
+invoking DOPi it will load the configuration file from DOPi first. All DOPc
+specific configuration goes to `config/dopc.yml`.
 
-See `config/initializers/01_settings/01_defaults.rb` for custom DOPc settings.
-Create a local file named `02_local.rb` in the same directory to overwrite
-settings. The file is ignored by Git.
+## Authentication
+
+All requests must must be authenticated by using an authorization token in the
+HTTP header of the form `Authorization: Token token=["]<token>["]`.
 
 ## API Specification
 
@@ -38,6 +43,11 @@ Returned if the `Content-Type` HTTP header is set and does not equal
 `application/json`. All payload data sent must be in JSON format and the
 content type header must indicate so if not empty.
 
+**401 Unauthorized**
+
+Returned if the client does not use HTTP authorization or the authorization
+token is wrong.
+
 **5xx Server Error**
 
 Returned if something unexpected goes wrong on the server side.
@@ -46,6 +56,7 @@ Returned if something unexpected goes wrong on the server side.
 
 * Client must accept `application/json` (`Accept` header)
 * Submitted payload must be `application/json` (`Content-Type` header)
+* Client must authenticate with token (`Authorization` header)
 
 #### GET /v1/ping
 
@@ -442,6 +453,9 @@ If any of the specified statuses is invalid.
 
 * Service is not protected by any sort of authentication or authorization, this
   is left to the setup (e.g. basic auth with Apache httpd).
+* When restarted old executions that were not yet run won't automatically be
+  scheduled. Must use rake task or add/remove executions to trigger scheduling.
+  (Do automatically on startup?)
 
 ## Todo
 

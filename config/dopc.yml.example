@@ -1,0 +1,5 @@
+production:
+  auth_token: ""
+
+development: 
+  auth_token: ""

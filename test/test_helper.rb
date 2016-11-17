@@ -4,6 +4,8 @@ require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
 require 'mocha/test_unit'
 
+require 'securerandom'
+
 class ActiveSupport::TestCase
 
   def setup_tmp
@@ -36,6 +38,13 @@ class ActiveSupport::TestCase
     Dopv.stubs(:load_data_volumes_db).returns(nil)
     Dopv.unstub(:run_plan)
     Dopv.stubs(:run_plan).raises(Exception, 'Testing error')
+  end
+
+  def setup_auth
+    @auth_token = SecureRandom.hex
+    Api::V1::ApiController.any_instance.unstub(:get_auth_token)
+    Api::V1::ApiController.any_instance.stub(:get_auth_token).returns(@auth_token)
+    #request.env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Token.encode_credentials(token)
   end
 
   def plan_file(name)

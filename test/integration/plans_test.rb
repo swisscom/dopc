@@ -5,6 +5,7 @@ class PlansTest < ActionDispatch::IntegrationTest
   setup do
     setup_tmp
     mock_cache
+    setup_auth
   end
 
   teardown do
