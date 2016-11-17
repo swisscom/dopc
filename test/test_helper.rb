@@ -27,17 +27,17 @@ class ActiveSupport::TestCase
   end
 
   def mock_dopv
-    Dopv.unstub(:load_data_volumes_db)
-    Dopv.stubs(:load_data_volumes_db).returns(nil)
-    Dopv.unstub(:run_plan)
-    Dopv.stubs(:run_plan).returns(nil)
+    Dopv.unstub(:deploy)
+    Dopv.unstub(:undeploy)
+    Dopv.stubs(:deploy).returns(nil)
+    Dopv.stubs(:undeploy).returns(nil)
   end
 
   def mock_dopv_fail
-    Dopv.unstub(:load_data_volumes_db)
-    Dopv.stubs(:load_data_volumes_db).returns(nil)
-    Dopv.unstub(:run_plan)
-    Dopv.stubs(:run_plan).raises(Exception, 'Testing error')
+    Dopv.unstub(:deploy)
+    Dopv.unstub(:undeploy)
+    Dopv.stubs(:deploy).raises(Exception, 'Testing error')
+    Dopv.stubs(:undeploy).raises(Exception, 'Testing error')
   end
 
   def setup_auth
@@ -73,6 +73,11 @@ class ActiveSupport::TestCase
   def add_plan(name)
     cache = DopCommon::PlanStore.new(@cachedir)
     cache.add(plan_file(name))
+  end
+
+  def remove_plan(name)
+    cache = DopCommon::PlanStore.new(@cachedir)
+    cache.remove(name)
   end
 
 end

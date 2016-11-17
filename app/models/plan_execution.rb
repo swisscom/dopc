@@ -81,49 +81,23 @@ class PlanExecution < ApplicationRecord
 
   def dopv_deploy(log)
     log.info('Deploying with DOPv')
-    plan_content = cache.get_plan_yaml(self[:plan])
-    tmp = Tempfile.new('dopc')
-    begin
-      tmp.write(plan_content)
-      tmp.close
-      plan = Dopv::load_plan(tmp.path)
-      # TODO: where to put disk db file?
-      vol_db = Dopv::load_data_volumes_db("disks-#{self.id}.db")
-      Dopv::run_plan(plan, vol_db, :deploy)
-    ensure
-      tmp.unlink
-    end
+    Dopv.deploy(self[:plan])
   end
 
   def dopv_undeploy(log)
     log.info('Undeploying with DOPv')
-    plan_content = cache.get_plan_yaml(self[:plan])
-    tmp = Tempfile.new('dopc')
-    begin
-      tmp.write(plan_content)
-      tmp.close
-      plan = Dopv::load_plan(tmp.path)
-      # TODO: where to put disk db file?
-      vol_db = Dopv::load_data_volumes_db("disks-#{self.id}.db")
-      Dopv::run_plan(plan, vol_db, :undeploy)
-    ensure
-      tmp.unlink
-    end
+    Dopv.undeploy(self[:plan])
   end
 
   def dopi_run(log)
     log.info('Running DOPi')
     options = {}
     options.merge!({step_set: self[:stepset]}) if self[:stepset]
-    if Rails.env.test?
-      options.merge!({noop: true}) if Rails.env.test?
-    else
-      config_file = Dopi.configuration.config_file
-      if config_file and File.file?(config_file) and !Rails.env.test?
-        config = YAML::load_file(config_file)
-        Dopi.configure = config
-        log.debug("Loaded DOPi configuration from #{config_file}")
-      end
+    config_file = Dopi.configuration.config_file
+    if config_file and File.file?(config_file) and !Rails.env.test?
+      config = YAML::load_file(config_file)
+      Dopi.configure = config
+      log.debug("Loaded DOPi configuration from #{config_file}")
     end
     Dopi.run(self[:plan], options) {
       # Avoid installing signal handler by passing block

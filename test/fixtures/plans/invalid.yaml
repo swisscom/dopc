@@ -1,21 +1,12 @@
-# name should not contain special chars like * and /
-name: '*invalid/*'
+name: "invalid"
 max_in_flight: 1
 
 infrastructures:
   'test':
     type: 'baremetal'
 
-# key should be 'nodes'
-node:
-  'linux01.example.com':
-    infrastructure: 'test'
-
-credentials:
-  'linux_login':
-    type: 'username_password'
-    username: 'root'
-    password: 'puppet'
+nodes:
+  'localhost': {}
 
 steps:
   - name: 'write hello world'
@@ -24,3 +15,4 @@ steps:
       plugin: 'custom'
       exec: 'echo'
       arguments: '"hello world"'
+

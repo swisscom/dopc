@@ -6,14 +6,14 @@ infrastructures:
     type: 'baremetal'
 
 nodes:
-  'linux01.example.com':
+  'localhost':
     infrastructure: 'test'
 
 credentials:
   'linux_login':
     type: 'username_password'
     username: 'root'
-    password: 'puppet'
+    password: 'root'
 
 steps:
   - name: 'write hello world'
@@ -22,13 +22,3 @@ steps:
       plugin: 'custom'
       exec: 'echo'
       arguments: '"hello world"'
-  - name: 'list the local dir'
-    nodes: 'all'
-    command:
-      plugin: 'custom'
-      exec: 'ls'
-  - name: 'list the environment'
-    nodes: 'all'
-    command:
-      plugin: 'custom'
-      exec: 'env'
