@@ -43,8 +43,15 @@ class ActiveSupport::TestCase
   def setup_auth
     @auth_token = SecureRandom.hex
     Api::V1::ApiController.any_instance.unstub(:get_auth_token)
-    Api::V1::ApiController.any_instance.stub(:get_auth_token).returns(@auth_token)
-    #request.env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Token.encode_credentials(token)
+    Api::V1::ApiController.any_instance.stubs(:get_auth_token).returns(@auth_token)
+  end
+
+  def auth_token
+    @auth_token
+  end
+
+  def auth_header
+    {'Authorization': ActionController::HttpAuthentication::Token.encode_credentials(@auth_token)}
   end
 
   def plan_file(name)

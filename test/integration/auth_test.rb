@@ -3,56 +3,38 @@ require 'test_helper'
 class AuthTest < ActionDispatch::IntegrationTest
 
   setup do
-    byebug
+    setup_auth
   end
 
-  test 'accept json' do
-    get '/api/v1/ping', headers: {'Accept' => 'application/json', 'Content-Type' => 'application/json'}
+  test 'normal authentication' do
+    get '/api/v1/ping', headers: {'Authorization': "Token token=\"#{auth_token}\""}, as: :json
     assert_response :success
   end
 
-  test 'accept any' do
-    get '/api/v1/ping', headers: {'Accept' => '*/*', 'Content-Type' => 'application/json'}
+  test 'unquoted authentication token' do
+    get '/api/v1/ping', headers: {'Authorization': "Token token=#{auth_token}"}, as: :json
     assert_response :success
   end
 
-  test 'accept any application' do
-    get '/api/v1/ping', headers: {'Accept' => 'application/*', 'Content-Type' => 'application/json'}
+  test 'missing authentication' do
+    get '/api/v1/ping', as: :json
+    assert_response :unauthorized
+  end
+
+  test 'invalid authentication header' do
+    get '/api/v1/ping', headers: {'Authorization': "#{auth_token}"},as: :json
+    assert_response :unauthorized
+  end
+
+  test 'invalid authentication token' do
+    get '/api/v1/ping', headers: {'Authorization': "Token token=\"#{auth_token}xyz\""}, as: :json
+    assert_response :unauthorized
+  end
+
+  # TODO: Thought this should fail, obviously Rails disagrees ...
+  test 'different authentication type' do
+    get '/api/v1/ping', headers: {'Authorization': "Bearer \"#{auth_token}\""}, as: :json
     assert_response :success
-  end
-
-  test 'accept json amongst others' do
-    get '/api/v1/ping', headers: {'Accept' => 'text/plain, application/json', 'Content-Type' => 'application/json'}
-    assert_response :success
-  end
-
-  test 'do not accept text' do
-    get '/api/v1/ping', headers: {'Accept' => 'text/plain', 'Content-Type' => 'application/json'}
-    data = JSON.parse(@response.body)
-    assert_response :not_acceptable
-    assert_equal @response.content_type, 'application/json'
-    assert_not_empty data['error']
-  end
-
-  test 'can send json' do
-    get '/api/v1/ping', headers: {'Accept' => 'application/json', 'Content-Type' => 'application/json'}
-    assert_response :success
-  end
-
-  test 'can not send text' do
-    get '/api/v1/ping', headers: {'Accept' => 'application/json', 'Content-Type' => 'text/plain'}
-    data = JSON.parse(@response.body)
-    assert_response :unsupported_media_type
-    assert_equal @response.content_type, 'application/json'
-    assert_not_empty data['error']
-  end
-
-  test 'can not send empty' do
-    get '/api/v1/ping', headers: {'Accept' => 'application/json', 'Content-Type' => ''}
-    data = JSON.parse(@response.body)
-    assert_response :unsupported_media_type
-    assert_equal @response.content_type, 'application/json'
-    assert_not_empty data['error']
   end
 
 end

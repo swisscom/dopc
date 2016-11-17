@@ -13,7 +13,7 @@ class PlansTest < ActionDispatch::IntegrationTest
   end
 
   test 'list no plans' do
-    get '/api/v1/plans', as: :json
+    get '/api/v1/plans', headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :success
     assert_kind_of Array, data['plans']
@@ -21,11 +21,11 @@ class PlansTest < ActionDispatch::IntegrationTest
   end
 
   test 'list plan' do
-    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :created
     assert_equal 'hello_world', data['name']
-    get '/api/v1/plans', as: :json
+    get '/api/v1/plans', headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :success
     assert_equal 1, data['plans'].size
@@ -33,73 +33,73 @@ class PlansTest < ActionDispatch::IntegrationTest
   end
 
   test 'add plan' do
-    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :created
     assert_equal 'hello_world', data['name']
   end
 
   test 'can not add plan twice' do
-    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :created
-    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :bad_request
     assert_not_empty data['error']
   end
 
   test 'can not add plan with invalid content' do
-    post '/api/v1/plans', params: {content: 'abc'}, as: :json
+    post '/api/v1/plans', params: {content: 'abc'}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :unprocessable_entity
     assert_not_empty data['error']
   end
 
   test 'can not add invalid plan' do
-    post '/api/v1/plans', params: {content: encode_plan('invalid')}, as: :json
+    post '/api/v1/plans', params: {content: encode_plan('invalid')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :bad_request
     assert_not_empty data['error']
   end
 
   test 'delete plan' do
-    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :created
     assert_equal 'hello_world', data['name']
-    delete '/api/v1/plans/hello_world', as: :json
+    delete '/api/v1/plans/hello_world', headers: auth_header, as: :json
     assert_response :success
     assert_equal 'hello_world', data['name']
   end
 
   test 'can not delete non-existent plan' do
-    delete "/api/v1/plans/does_not_exist", as: :json
+    delete "/api/v1/plans/does_not_exist", headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :not_found
     assert_not_empty data['error']
   end
 
   test 'can not delete plan twice' do
-    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :created
     assert_equal 'hello_world', data['name']
-    delete '/api/v1/plans/hello_world', as: :json
+    delete '/api/v1/plans/hello_world', headers: auth_header, as: :json
     assert_response :success
     assert_equal 'hello_world', data['name']
-    delete '/api/v1/plans/hello_world', as: :json
+    delete '/api/v1/plans/hello_world', headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :not_found
     assert_not_empty data['error']
   end
 
   test 'get added plan' do
-    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :created
     assert_equal 'hello_world', data['name']
-    get '/api/v1/plans/hello_world', as: :json
+    get '/api/v1/plans/hello_world', headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :success
     # When the API creates a plan from the YAML the content is slightly
@@ -110,49 +110,49 @@ class PlansTest < ActionDispatch::IntegrationTest
   end
 
   test 'can not get non-existent plan' do
-    get "/api/v1/plans/does_not_exist", as: :json
+    get "/api/v1/plans/does_not_exist", headers: auth_header, as: :json
     assert_response :not_found
   end
 
   test 'update added plan' do
-    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :created
     assert_equal 'hello_world', data['name']
-    put '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    put '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :success
     assert_equal 'hello_world', data['name']
   end
 
   test 'when updating plan names must match' do
-    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :created
     assert_equal 'hello_world', data['name']
-    put '/api/v1/plans', params: {content: encode_plan('hello_world_2')}, as: :json
+    put '/api/v1/plans', params: {content: encode_plan('hello_world_2')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :bad_request
     assert_not_empty data['error']
   end
 
   test 'can not update non-existent plan' do
-    put '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    put '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :bad_request
     assert_not_empty data['error']
   end
 
   test 'get versions' do
-    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :created
     assert_equal 'hello_world', data['name']
-    put '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    put '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :success
     assert_equal 'hello_world', data['name']
-    get '/api/v1/plans/hello_world/versions', as: :json
+    get '/api/v1/plans/hello_world/versions', headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :success
     assert_kind_of Array, data['versions']
@@ -161,39 +161,39 @@ class PlansTest < ActionDispatch::IntegrationTest
   end
 
   test 'reset a plan' do
-    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :created
     assert_equal 'hello_world', data['name']
-    put '/api/v1/plans/hello_world/reset', params: {force: true}, as: :json
+    put '/api/v1/plans/hello_world/reset', params: {force: true}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :success
     assert_equal 'hello_world', data['name']
-    put '/api/v1/plans/hello_world/reset', params: {force: false}, as: :json
+    put '/api/v1/plans/hello_world/reset', params: {force: false}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :success
     assert_equal 'hello_world', data['name']
   end
 
   test 'invalid reset' do
-    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :created
     assert_equal 'hello_world', data['name']
-    put '/api/v1/plans/hello_worlds/reset', params: {force: false}, as: :json
+    put '/api/v1/plans/hello_worlds/reset', params: {force: false}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :not_found
-    put '/api/v1/plans/hello_world/reset', params: {force: 1}, as: :json
+    put '/api/v1/plans/hello_world/reset', params: {force: 1}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :unprocessable_entity
   end
 
   test 'show state of plan' do
-    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, as: :json
+    post '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :created
     assert_equal 'hello_world', data['name']
-    get '/api/v1/plans/hello_world/state', params: {force: false}, as: :json
+    get '/api/v1/plans/hello_world/state', params: {force: false}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :success
     assert_match /ready/, data['state']
