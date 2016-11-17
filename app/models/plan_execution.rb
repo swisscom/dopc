@@ -81,34 +81,12 @@ class PlanExecution < ApplicationRecord
 
   def dopv_deploy(log)
     log.info('Deploying with DOPv')
-    plan_content = cache.get_plan_yaml(self[:plan])
-    tmp = Tempfile.new('dopc')
-    begin
-      tmp.write(plan_content)
-      tmp.close
-      plan = Dopv::load_plan(tmp.path)
-      # TODO: where to put disk db file?
-      vol_db = Dopv::load_data_volumes_db("disks-#{self.id}.db")
-      Dopv::run_plan(plan, vol_db, :deploy)
-    ensure
-      tmp.unlink
-    end
+    Dopv.deploy(self[:plan])
   end
 
   def dopv_undeploy(log)
     log.info('Undeploying with DOPv')
-    plan_content = cache.get_plan_yaml(self[:plan])
-    tmp = Tempfile.new('dopc')
-    begin
-      tmp.write(plan_content)
-      tmp.close
-      plan = Dopv::load_plan(tmp.path)
-      # TODO: where to put disk db file?
-      vol_db = Dopv::load_data_volumes_db("disks-#{self.id}.db")
-      Dopv::run_plan(plan, vol_db, :undeploy)
-    ensure
-      tmp.unlink
-    end
+    Dopv.undeploy(self[:plan])
   end
 
   def dopi_run(log)

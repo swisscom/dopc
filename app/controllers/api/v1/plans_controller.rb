@@ -1,5 +1,7 @@
 require 'base64'
 require 'yaml'
+require 'tempfile'
+
 require 'dop_common'
 require 'dopi/cli/log'
 
@@ -27,42 +29,52 @@ class Api::V1::PlansController < Api::V1::ApiController
 
   def create
     begin
-      hash = YAML.load(Base64.decode64(params[:content]))
+      content = Base64.decode64(params[:content])
+      hash = YAML.load(content)
     rescue Exception => e
       render json: {error: "Failed to load content: #{e}"}, status: :unprocessable_entity
       return
     end
+    tmp = Tempfile.new('dopc')
     begin
-      name = cache.add(hash)
+      tmp.write(content)
+      tmp.close
+      name = Dopi.add(tmp)
     rescue StandardError => e
       render json: {error: "Failed to add plan: #{e}"}, status: :bad_request
       return
+    ensure
+      tmp.unlink
     end
     render json: {name: name}, status: :created
   end
 
   def update_content
     begin
-      hash = YAML.load(Base64.decode64(params[:content]))
+      content = Base64.decode64(params[:content])
+      hash = YAML.load(content)
       plan = DopCommon::Plan.new(hash)
     rescue Exception => e
       render json: {error: "Failed to load content: #{e}"}, status: :unprocessable_entity
       return
     end
-    name = nil
+    tmp = Tempfile.new('dopc')
     begin
       PlanExecution.transaction do
         if not PlanExecution.where(status: :running, plan: plan.name).empty?
           render json: {error: "Can not update a plan that has running executions"}, status: :conflict
         end
-        name = cache.update(hash)
-        Dopi.update_state(name, {:clear => true})
+        tmp.write(content)
+        tmp.close
+        Dopi.update_plan(tmp, {:clear => true})
       end
     rescue StandardError => e
       render json: {error: "Failed to update plan: #{e}"}, status: :bad_request
       return
+    ensure
+      tmp.unlink
     end
-    render json: {name: name}
+    render json: {name: plan.name}
   end
 
   def destroy
