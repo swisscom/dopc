@@ -44,8 +44,8 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
         return
       end
       execution.destroy
-      execution.delete_log
     end
+    execution.delete_log
     PlanExecution.schedule
     render json: execution.to_hash
   end

@@ -44,6 +44,7 @@ class PlanExecution < ApplicationRecord
   def run
     Log.set_loggers(log)
     self.status_running!
+    self.update(started_at: Time.now)
     log.info('Execution started')
     case self[:task]
     when 'setup'
@@ -64,12 +65,13 @@ class PlanExecution < ApplicationRecord
     self.status_failed!
     log.error("Execution failed: #{e.message}: #{e.backtrace.join('\n')}")
   ensure
+    self.update(finished_at: Time.now)
     Log.set_loggers(Delayed::Worker.logger, true)
     self.class.schedule
   end
 
   def to_hash
-    {id: self[:id], plan: self[:plan], task: self[:task], stepset: self[:stepset], status: self[:status], created_at: self[:created_at], updated_at: self[:updated_at]}
+    {id: self[:id], plan: self[:plan], task: self[:task], stepset: self[:stepset], status: self[:status], created_at: self[:created_at], updated_at: self[:updated_at], started_at: self[:started_at], finished_at: self[:finished_at]}
   end
 
   def read_log
@@ -77,7 +79,7 @@ class PlanExecution < ApplicationRecord
   end
 
   def delete_log
-    File.delete(log_file) if File.file?(log_file)
+    Util.rm_ensure(log_file)
   end
 
   private

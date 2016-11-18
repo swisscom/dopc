@@ -311,10 +311,12 @@ Get list of all executions.
 | String | &nbsp;&nbsp;- status | Execution status | yes |
 | String | &nbsp;&nbsp;- created_at | Timestamp when the execution was created | yes |
 | String | &nbsp;&nbsp;- updated_at | Timestamp when the execution was last updated | yes |
+| String | &nbsp;&nbsp;- started_at | Timestamp when the execution was started | no |
+| String | &nbsp;&nbsp;- finished_at | Timestamp when the execution was finished | no |
 
 #### GET /v1/executions/{id}
 
-Get an execution.
+Get execution with the specified ID.
 
 **Path Parameters**
 
@@ -324,14 +326,7 @@ Get an execution.
 
 **200 OK**
 
-| Type | Property | Description | Required |
-| --- | --- | --- | --- |
-| Integer | id | ID of the execution | yes |
-| String | plan | Plan to execute | yes |
-| String | task | Task to execute | yes |
-| String | stepset | Stepset to execute instead of default | yes |
-| String | status | Execution status | yes |
-| String | log | Execution log, mostly only in error case | yes |
+See the GET on `/executions` for the list of returned properties.
 
 **404 Not Found**
 
@@ -377,7 +372,7 @@ Remove an execution.
 
 **200 OK**
 
-Returns the removed execution. See GET for the response body format.
+See GET for the list of returned properties.
 
 **404 Not Found**
 

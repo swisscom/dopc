@@ -1,5 +1,3 @@
-#require "#{Rails.root}/app/models/plan_execution"
-
 namespace :dopc do
 
   desc "Force scheduling new executions"
@@ -24,7 +22,7 @@ namespace :log do
       ids = PlanExecution.ids
       Dir[File.join(PlanExecution.log_dir, '*.log')].each do |f|
         id = File.basename(f).gsub(/\.log$/, '').to_i
-        File.delete(f) unless ids.include?(id)
+        Util.rm_ensure(f) unless ids.include?(id)
       end
     end
 
