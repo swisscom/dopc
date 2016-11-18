@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160928132753) do
+ActiveRecord::Schema.define(version: 20161118082400) do
 
   create_table "delayed_jobs", force: :cascade do |t|
     t.integer  "priority",   default: 0, null: false
@@ -32,7 +32,6 @@ ActiveRecord::Schema.define(version: 20160928132753) do
     t.integer  "task",                   null: false
     t.string   "stepset"
     t.integer  "status",     default: 0, null: false
-    t.string   "log"
     t.datetime "created_at",             null: false
     t.datetime "updated_at",             null: false
   end

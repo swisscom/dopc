@@ -3,9 +3,7 @@ require 'dopv'
 require 'dopi'
 require 'log'
 
-require 'tempfile'
 require 'fileutils'
-require 'stringio'
 require 'yaml'
 
 class PlanExecution < ApplicationRecord
@@ -15,6 +13,10 @@ class PlanExecution < ApplicationRecord
 
   def self.log
     Delayed::Worker.logger
+  end
+
+  def self.log_dir
+    File.join(Rails.root, 'log', 'executions')
   end
 
   def self.schedule
@@ -40,21 +42,19 @@ class PlanExecution < ApplicationRecord
   end
 
   def run
-    buf = StringIO.new
-    log = Logger.new(buf)
     Log.set_loggers(log)
     self.status_running!
     log.info('Execution started')
     case self[:task]
     when 'setup'
-      dopv_deploy(log)
-      dopi_run(log)
+      dopv_deploy
+      dopi_run
     when 'deploy'
-      dopv_deploy(log)
+      dopv_deploy
     when 'run'
-      dopi_run(log)
+      dopi_run
     when 'undeploy'
-      dopv_undeploy(log)
+      dopv_undeploy
     else
       raise "Invalid task: #{self[:task]}"
     end
@@ -64,8 +64,7 @@ class PlanExecution < ApplicationRecord
     self.status_failed!
     log.error("Execution failed: #{e.message}: #{e.backtrace.join('\n')}")
   ensure
-    self.update(log: buf.string)
-    Log.set_loggers(Rails.logger, true)
+    Log.set_loggers(Delayed::Worker.logger, true)
     self.class.schedule
   end
 
@@ -73,23 +72,40 @@ class PlanExecution < ApplicationRecord
     {id: self[:id], plan: self[:plan], task: self[:task], stepset: self[:stepset], status: self[:status], created_at: self[:created_at], updated_at: self[:updated_at]}
   end
 
+  def read_log
+    File.file?(log_file) ? File.read(log_file) : ''
+  end
+
+  def delete_log
+    File.delete(log_file) if File.file?(log_file)
+  end
+
   private
+
+  def log_file
+    File.join(self.class.log_dir, self.id.to_s + '.log')
+  end
+
+  def log
+    FileUtils.mkdir_p(File.dirname(log_file))
+    @log ||= Logger.new(log_file)
+  end
 
   def cache
     DopCommon::PlanStore.new(Dopi.configuration.plan_store_dir)
   end
 
-  def dopv_deploy(log)
+  def dopv_deploy
     log.info('Deploying with DOPv')
     Dopv.deploy(self[:plan])
   end
 
-  def dopv_undeploy(log)
+  def dopv_undeploy
     log.info('Undeploying with DOPv')
     Dopv.undeploy(self[:plan])
   end
 
-  def dopi_run(log)
+  def dopi_run
     log.info('Running DOPi')
     options = {}
     options.merge!({step_set: self[:stepset]}) if self[:stepset]

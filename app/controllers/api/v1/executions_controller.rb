@@ -44,6 +44,7 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
         return
       end
       execution.destroy
+      execution.delete_log
     end
     PlanExecution.schedule
     render json: execution.to_hash
@@ -67,6 +68,9 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
         destroyed = PlanExecution.where(status: statuses).destroy_all
       end
     end
+    destroyed.each do |e|
+      e.delete_log
+    end
     PlanExecution.schedule
     render json: {executions: destroyed.collect{|e| e.to_hash}}
   end
@@ -74,7 +78,7 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
   def log
     execution = PlanExecution.find_by_id(params[:id])
     if execution
-      render json: {log: execution.log}
+      render json: {log: execution.read_log}
     else
       render json: {error: 'Execution not found'}, status: :not_found
     end

@@ -15,7 +15,6 @@ See `Gemfile` for ruby version and gems.
 1. Setup database: `bundle exec rake db:migrate`
 1. Start server: `bundle exec rails s`
 1. Start Delayed::Job to start processing plan executions: `bundle exec bin/delayed_job start`
-1. Schedule old job executions: `bundle exec rake dopc:schedule`
 
 ## Configuration
 
@@ -27,6 +26,16 @@ specific configuration goes to `config/dopc.yml`.
 
 All requests must must be authenticated by using an authorization token in the
 HTTP header of the form `Authorization: Token token=["]<token>["]`.
+
+## Maintenance
+
+If for any reason executions are not scheduled to run you can do so manually by
+running `bundle exec rake dopc:schedule`. This can for example happen if
+Delayed::Job is restarted with pending executions.
+
+Logs are not rotated automatically. To truncate logs use `bundle exec rake
+log:clear:all`. In error cases it can happen that executions log files are left
+over, then use `bundle exec rake log:clear:exe` to delete them.
 
 ## API Specification
 
@@ -449,6 +458,12 @@ If any of the specified statuses is invalid.
 * Before calling DOPi its configuration is loaded from file (usually
   `~/.dop/dopi.conf`, except when the Rails environment is `test`, then also
   all executions are started with the `noop` option.
+
+## Troubleshooting
+
+Rails logs everything to `log/<environment>.log`. Delayed::Job runs in separate
+processes and logs to `log/jobs_<environment>.log`. Executions log to
+individual log files in `log/executions/<job_id>.log`.
 
 ## Caveats
 
