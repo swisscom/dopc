@@ -16,7 +16,7 @@ class PlanExecution < ApplicationRecord
   end
 
   def self.log_dir
-    File.join(Rails.root, 'log', 'executions')
+    File.join(Rails.root, 'log', 'executions_' + Rails.env)
   end
 
   def self.schedule

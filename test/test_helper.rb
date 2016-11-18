@@ -26,6 +26,12 @@ class ActiveSupport::TestCase
     Dopi.instance_variable_set('@plan_store', nil)
   end
 
+  def mock_logdir
+    @logdir = File.join(@tmpdir, 'executions')
+    PlanExecution.unstub(:log_dir)
+    PlanExecution.stubs(:log_dir).returns(@logdir)
+  end
+
   def mock_dopv
     Dopv.unstub(:deploy)
     Dopv.unstub(:undeploy)
