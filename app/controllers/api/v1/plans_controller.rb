@@ -63,10 +63,13 @@ class Api::V1::PlansController < Api::V1::ApiController
       PlanExecution.transaction do
         if not PlanExecution.where(status: :running, plan: plan.name).empty?
           render json: {error: "Can not update a plan that has running executions"}, status: :conflict
+          return
         end
         tmp.write(content)
         tmp.close
-        Dopi.update_plan(tmp, {:clear => true})
+        cache.update(tmp)
+        Dopi.update_state(plan.name, {:clear => true})
+        Dopv.update_state(plan.name, {:ignore => true})
       end
     rescue StandardError => e
       render json: {error: "Failed to update plan: #{e}"}, status: :bad_request
