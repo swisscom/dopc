@@ -104,7 +104,11 @@ class PlanExecution < ApplicationRecord
 
   def dopv_undeploy
     log.info('Undeploying with DOPv')
-    Dopv.undeploy(self[:plan])
+    if self[:rmdisk]
+      Dopv.undeploy(self[:plan], true)
+    else
+      Dopv.undeploy(self[:plan])
+    end
   end
 
   def dopi_run
