@@ -17,8 +17,8 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     teardown_tmp
   end
 
-  test 'start execution' do
-    post '/api/v1/executions', params: {plan: 'hello_world', task: 'setup'}, headers: auth_header, as: :json
+  test 'start deployment' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'deploy'}, headers: auth_header, as: :json
     assert_response :created
     data = JSON.parse(@response.body)
     id = data['id']
@@ -26,16 +26,126 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     get "/api/v1/executions/#{id}", headers: auth_header, as: :json
     assert_response :success
     data = JSON.parse(@response.body)
-    # Must not check status, could be either new or already queued
+    assert_equal id, data['id']
+    assert_equal 'hello_world', data['plan']
+    assert_equal 'deploy', data['task']
+    assert_includes ['new', 'queued'], data['status']
+    assert_not_empty data['created_at']
+    assert_not_empty data['updated_at']
+  end
+
+  test 'start run' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'run', stepset: 'default'}, headers: auth_header, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    id = data['id']
+    assert_equal 1, id
+    get "/api/v1/executions/#{id}", headers: auth_header, as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal id, data['id']
+    assert_equal 'hello_world', data['plan']
+    assert_equal 'run', data['task']
+    assert_includes ['new', 'queued'], data['status']
+    assert_equal 'default', data['stepset']
+    assert_not_empty data['created_at']
+    assert_not_empty data['updated_at']
+  end
+
+  test 'start setup' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'setup', stepset: 'default'}, headers: auth_header, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    id = data['id']
+    assert_equal 1, id
+    get "/api/v1/executions/#{id}", headers: auth_header, as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
     assert_equal id, data['id']
     assert_equal 'hello_world', data['plan']
     assert_equal 'setup', data['task']
-    assert_equal nil, data['stepset']
-    assert_equal nil, data['log']
+    assert_includes ['new', 'queued'], data['status']
+    assert_equal 'default', data['stepset']
+    assert_not_empty data['created_at']
+    assert_not_empty data['updated_at']
+  end
+
+  test 'start undeployment' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'undeploy', rmdisk: true}, headers: auth_header, as: :json
+    assert_response :created
+    data = JSON.parse(@response.body)
+    id = data['id']
+    assert_equal 1, id
+    get "/api/v1/executions/#{id}", headers: auth_header, as: :json
+    assert_response :success
+    data = JSON.parse(@response.body)
+    assert_equal id, data['id']
+    assert_equal 'hello_world', data['plan']
+    assert_equal 'undeploy', data['task']
+    assert_includes ['new', 'queued'], data['status']
+    assert_equal true, data['rmdisk']
+    assert_not_empty data['created_at']
+    assert_not_empty data['updated_at']
+  end
+
+  test 'missing plan' do
+    post '/api/v1/executions', params: {task: 'deploy'}, headers: auth_header, as: :json
+    assert_response :unprocessable_entity
+    data = JSON.parse(@response.body)
+    assert_not_empty data['error']
+  end
+
+  test 'invalid plan name type' do
+    post '/api/v1/executions', params: {plan: 123, task: 'setup'}, headers: auth_header, as: :json
+    assert_response :unprocessable_entity
+    data = JSON.parse(@response.body)
+    assert_not_empty data['error']
+  end
+
+  test 'missing task' do
+    post '/api/v1/executions', params: {plan: 'hello_world'}, headers: auth_header, as: :json
+    assert_response :unprocessable_entity
+    data = JSON.parse(@response.body)
+    assert_not_empty data['error']
+  end
+
+  test 'invalid task name type' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: false}, headers: auth_header, as: :json
+    assert_response :unprocessable_entity
+    data = JSON.parse(@response.body)
+    assert_not_empty data['error']
   end
 
   test 'invalid task' do
     post '/api/v1/executions', params: {plan: 'hello_world', task: 'invalid'}, headers: auth_header, as: :json
+    assert_response :unprocessable_entity
+    data = JSON.parse(@response.body)
+    assert_not_empty data['error']
+  end
+
+  test 'invalid stepset name type' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'run', stepset: 0.1}, headers: auth_header, as: :json
+    assert_response :unprocessable_entity
+    data = JSON.parse(@response.body)
+    assert_not_empty data['error']
+  end
+
+  test 'illegal stepset' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'deploy', stepset: 'default'}, headers: auth_header, as: :json
+    assert_response :unprocessable_entity
+    data = JSON.parse(@response.body)
+    assert_not_empty data['error']
+  end
+
+  test 'invalid rmdisk type' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'undeploy', rmdisk: 'true'}, headers: auth_header, as: :json
+    assert_response :unprocessable_entity
+    data = JSON.parse(@response.body)
+    assert_not_empty data['error']
+  end
+
+  test 'illegal rmdisk' do
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'deploy', rmdisk: true}, headers: auth_header, as: :json
     assert_response :unprocessable_entity
     data = JSON.parse(@response.body)
     assert_not_empty data['error']

@@ -307,7 +307,8 @@ Get list of all executions.
 | Integer | &nbsp;&nbsp;- id | ID of the execution | yes |
 | String | &nbsp;&nbsp;- plan | Plan to execute | yes |
 | String | &nbsp;&nbsp;- task | Task to execute | yes |
-| String | &nbsp;&nbsp;- stepset | Stepset to execute instead of default | yes |
+| String | &nbsp;&nbsp;- stepset | Stepset to execute instead of default | no |
+| Boolean | &nbsp;&nbsp;- rmdisk | Whether to delete disks when undeploying | no |
 | String | &nbsp;&nbsp;- status | Execution status | yes |
 | String | &nbsp;&nbsp;- created_at | Timestamp when the execution was created | yes |
 | String | &nbsp;&nbsp;- updated_at | Timestamp when the execution was last updated | yes |
@@ -400,7 +401,9 @@ Execute a plan. Creates a job to execute the plan in the background.
 | --- | --- | --- | --- |
 | String | plan | The name of the plan to execute | yes |
 | String | task | Task to execute, must be one of: deploy, undeploy, run or setup (deploy + run). | yes |
-| String | stepset | Stepset to run instead of the default, for DOPi | no |
+| String | stepset | Stepset to run instead of the default, for DOPi | no, can
+only use with tasks run/setup (if empty the default stepset is used) |
+| Boolean | rmdisk | Whether to delete disks when undeploying, for DOPv | no, can only use with task undeploy (if empty false is assumed) |
 
 **201 Created**
 

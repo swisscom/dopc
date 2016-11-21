@@ -71,7 +71,7 @@ class PlanExecution < ApplicationRecord
   end
 
   def to_hash
-    {id: self[:id], plan: self[:plan], task: self[:task], stepset: self[:stepset], status: self[:status], created_at: self[:created_at], updated_at: self[:updated_at], started_at: self[:started_at], finished_at: self[:finished_at]}
+    {id: self[:id], plan: self[:plan], task: self[:task], stepset: self[:stepset], rmdisk: self[:rmdisk], status: self[:status], created_at: self[:created_at], updated_at: self[:updated_at], started_at: self[:started_at], finished_at: self[:finished_at]}
   end
 
   def read_log

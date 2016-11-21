@@ -9,15 +9,43 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
       render json: {error: 'Missing property: plan'}, status: :unprocessable_entity
       return
     end
+    unless params[:plan].is_a?(String)
+      render json: {error: 'Invalid property: plan must be a string'}, status: :unprocessable_entity
+      return
+    end
     unless params[:task]
       render json: {error: 'Missing property: task'}, status: :unprocessable_entity
+      return
+    end
+    unless params[:task].is_a?(String)
+      render json: {error: 'Invalid property: task must be a string'}, status: :unprocessable_entity
       return
     end
     unless PlanExecution.tasks.keys.include? params[:task]
       render json: {error: "Invalid task '#{params[:task]}', must be one of: #{PlanExecution.tasks.keys}"}, status: :unprocessable_entity
       return
     end
-    exec = PlanExecution.create(plan: params[:plan], task: params[:task], stepset: params[:stepset], status: :new)
+    if params[:stepset]
+      unless params[:stepset].is_a?(String)
+        render json: {error: 'Invalid property: stepset must be a string'}, status: :unprocessable_entity
+        return
+      end
+      unless params[:task] == 'run' or params[:task] == 'setup'
+        render json: {error: 'Too much properties: stepset must only be used with tasks run/setup'}, status: :unprocessable_entity
+        return
+      end
+    end
+    if params[:rmdisk]
+      unless params[:rmdisk].is_a?(TrueClass) or params[:rmdisk].is_a?(FalseClass)
+        render json: {error: 'Invalid property: rmdisk must be a boolean'}, status: :unprocessable_entity
+        return
+      end
+      unless params[:task] == 'undeploy'
+        render json: {error: 'Too much properties: rmdisk must only be used with task undeploy'}, status: :unprocessable_entity
+        return
+      end
+    end
+    exec = PlanExecution.create(plan: params[:plan], task: params[:task], stepset: params[:stepset], rmdisk: params[:rmdisk], status: :new)
     PlanExecution.schedule
     render json: {id: exec.id}, status: :created
   end
