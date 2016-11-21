@@ -25,7 +25,7 @@ GIT
 
 GIT
   remote: https://gitlab.swisscloud.io/clu-dop/dopv.git
-  revision: 23d3b2e7a1e60a2c9420e0257dd37b6e2d2f95dd
+  revision: ca532e534a0d150684cb78c293cbb19a83b4254d
   tag: master
   specs:
     dopv (0.5.0)
