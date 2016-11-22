@@ -3,7 +3,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       get '/ping', to: 'application#ping'
       # Put will not work on :id, the name/id will be taken from the content
-      put '/plans', to: 'plans#update_content'
+      put '/plans', to: 'plans#update_plan'
       resources :plans do
         member do
           get 'versions'

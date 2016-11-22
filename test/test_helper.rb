@@ -22,8 +22,9 @@ class ActiveSupport::TestCase
     plancache = DopCommon::PlanStore.new(@cachedir)
     DopCommon::PlanStore.stubs(:new).returns(plancache)
     Dopi.configuration.plan_store_dir = @cachedir
-    Dopi.configuration.log_dir = "#{@cachedir}/log"
+    Dopi.configuration.log_dir = File.join(@tmpdir, 'log')
     Dopi.instance_variable_set('@plan_store', nil)
+    Dopv.instance_variable_set('@plan_store', nil)
   end
 
   def mock_logdir

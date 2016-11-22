@@ -199,7 +199,7 @@ class PlansTest < ActionDispatch::IntegrationTest
     assert_match /\[ready\]/, data['state']
   end
 
-  test 'plan state is cleared on update' do
+  test 'clear dopi state' do
     post '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :created
@@ -221,7 +221,7 @@ class PlansTest < ActionDispatch::IntegrationTest
     data = JSON.parse(@response.body)
     assert_response :success
     assert_match /\[done\]/, data['state']
-    put '/api/v1/plans', params: {content: encode_plan('hello_world')}, headers: auth_header, as: :json
+    put '/api/v1/plans', params: {plan: 'hello_world', clear: true}, headers: auth_header, as: :json
     data = JSON.parse(@response.body)
     assert_response :success
     assert_equal 'hello_world', data['name']

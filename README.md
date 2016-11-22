@@ -178,14 +178,20 @@ If the plan can not be added, e.g. it already exists or is invalid.
 
 #### PUT /v1/plans
 
-Update an existing plan, creating a new version. The plan with the name taken
-from the content must already exist on the server.
+Update an existing plan. Either create a new version, then a plan file must be
+specified. Or just update the state of an existing plan, then the plan name
+must be specified.
 
 **Request Body**
 
+Either plan or content is required.
+
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
-| String | content | Base64 encoded string with YAML content of the plan | yes |
+| String | content | Base64 encoded string with YAML content of the plan | no |
+| String | plan | Plan name | no |
+| Boolean | clear | Remove current DOPi state and start with clean state (if empty defaults to false) | no |
+| Boolean | ignore | Ignore update and just set new version (if empty defaults to false) | no |
 
 **200 Success**
 
