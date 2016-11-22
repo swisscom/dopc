@@ -471,16 +471,16 @@ individual log files in `log/executions/<job_id>.log`.
 
 ## Caveats
 
-* Service is not protected by any sort of authentication or authorization, this
-  is left to the setup (e.g. basic auth with Apache httpd).
-* When restarted old executions that were not yet run won't automatically be
-  scheduled. Must use rake task or add/remove executions to trigger scheduling.
-  (Do automatically on startup?)
+* When crashing pending executions will not necessarily be scheduled after
+  restart. Only if there is at least one queued execution or some execution is
+  added added/deleted.
 
 ## Todo
 
-* Running DOPv: Where to put disk DB file?
 * Test recovering failed workers
+* Some test does not clean up temporary directory
+* Must not remove execution that is already queued, or clean up delayed job as
+  well.
 
 ## Authors
 
