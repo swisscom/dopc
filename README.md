@@ -462,23 +462,28 @@ If any of the specified statuses is invalid.
 * Before calling DOPi its configuration is loaded from file (usually
   `~/.dop/dopi.conf`, except when the Rails environment is `test`, then also
   all executions are started with the `noop` option.
+* Be careful with mocking and setup/teardown in tests, may cause trouble with
+  unclean state in tests or leaving over tmp files/logs/etc.
 
 ## Troubleshooting
 
 Rails logs everything to `log/<environment>.log`. Delayed::Job runs in separate
 processes and logs to `log/jobs_<environment>.log`. Executions log to
-individual log files in `log/executions/<job_id>.log`.
+individual log files in `log/executions_<environment>/<job_id>.log`.
 
 ## Caveats
 
 * When crashing pending executions will not necessarily be scheduled after
   restart. Only if there is at least one queued execution or some execution is
   added added/deleted.
+* Logging per execution works only as long as a job is executed in its own Ruby
+  process (which is the case with Delayed::Job) since the log is set globally.
+  In future this may require to set individual log objects for each DOPv/DOPi
+  run.
 
 ## Todo
 
 * Test recovering failed workers
-* Some test does not clean up temporary directory
 * Must not remove execution that is already queued, or clean up delayed job as
   well.
 
