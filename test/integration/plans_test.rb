@@ -5,6 +5,8 @@ class PlansTest < ActionDispatch::IntegrationTest
   setup do
     setup_tmp
     mock_cache
+    mock_logdir
+    mock_dopv
     setup_auth
   end
 
