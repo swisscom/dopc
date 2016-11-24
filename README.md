@@ -60,6 +60,14 @@ Rails logs everything to `log/<environment>.log`. Delayed::Job runs in separate
 processes and logs to `log/jobs_<environment>.log`. Executions log to
 individual log files in `log/executions_<environment>/<job_id>.log`.
 
+## Contributing
+
+* Be sure that API specifiction in this file is consistent with the code.
+
+## Releasing
+
+TODO
+
 ## Caveats
 
 * When crashing pending executions will not necessarily be scheduled after
@@ -73,6 +81,11 @@ individual log files in `log/executions_<environment>/<job_id>.log`.
 ## Todo
 
 * Test recovering failed workers
+* Some things are not tested: e.g. Invalid/missing parameters or invalid
+  combinations of parameters, certain scenarios like remove plan during run.
+  Could use more tests. Also think about splitting up test files not by
+  controller but by scenarios. Some integration tests concern more than one
+  controller. Some things are not easy to test.
 
 ## API Specification
 
