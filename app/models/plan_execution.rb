@@ -9,7 +9,7 @@ require 'yaml'
 class PlanExecution < ApplicationRecord
 
   enum status: [:new, :queued, :running, :done, :failed], _prefix: true
-  enum task: [:setup, :run, :deploy, :undeploy], _prefix: true
+  enum task: [:setup, :run, :deploy, :undeploy, :teardown], _prefix: true
 
   def self.log
     Delayed::Worker.logger
@@ -50,6 +50,9 @@ class PlanExecution < ApplicationRecord
     when 'setup'
       dopv_deploy
       dopi_run
+    when 'teardown'
+      dopv_undeploy
+      Dopi.reset(self[:plan], true)
     when 'deploy'
       dopv_deploy
     when 'run'

@@ -403,13 +403,18 @@ Execute a plan. Creates a job to execute the plan in the background.
 
 **Request Body**
 
+For tasks deploy/undeploy only DOPv is run. For task run only DOPi is run.
+Special tasks are:
+
+* setup means deploy followed by run
+* teardown means undeploy followed by resetting DOPi state
+
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
 | String | plan | The name of the plan to execute | yes |
-| String | task | Task to execute, must be one of: deploy, undeploy, run or setup (deploy + run). | yes |
-| String | stepset | Stepset to run instead of the default, for DOPi | no, can
-only use with tasks run/setup (if empty the default stepset is used) |
-| Boolean | rmdisk | Whether to delete disks when undeploying, for DOPv | no, can only use with task undeploy (if empty false is assumed) |
+| String | task | Task to execute, must be one of: deploy, undeploy, run, setup, teardown. | yes |
+| String | stepset | Stepset to run instead of the default, for DOPi | no, can only use with tasks run/setup (if empty the default stepset is used) |
+| Boolean | rmdisk | Whether to delete disks when undeploying, for DOPv | no, can only use with task undeploy (defaults is false) |
 
 **201 Created**
 
