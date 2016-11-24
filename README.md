@@ -4,7 +4,7 @@ DOPc combines DOPi and DOPv in one tools and exposes a REST API.
 
 ## Requirements
 
-See `Gemfile` for ruby version and gems.
+See `Gemfile` for required gems.
 
 ## Quickstart
 
@@ -36,6 +36,43 @@ Delayed::Job is restarted with pending executions.
 Logs are not rotated automatically. To truncate logs use `bundle exec rake
 log:clear:all`. In error cases it can happen that executions log files are left
 over, then use `bundle exec rake log:clear:exe` to delete them.
+
+## Implementation
+
+* Plans are executed in background with Delayed::Job.
+* Scheduling plan executions is done everytime a new execution is added or an
+  execution finishes.
+* When restarting scheduling must be done manually with the `dopc:schedule`
+  rake task.
+* Plans are managed with the plan store from dop_common, nothing is stored in
+  the local database. Plans and executions are connected only by the plan name
+  (no IDs).
+* Only one execution for a specific plan can be running or queued at a time.
+* Before calling DOPi its configuration is loaded from file (usually
+  `~/.dop/dopi.conf`, except when the Rails environment is `test`, then also
+  all executions are started with the `noop` option.
+* Be careful with mocking and setup/teardown in tests, may cause trouble with
+  unclean state in tests or leaving over tmp files/logs/etc.
+
+## Troubleshooting
+
+Rails logs everything to `log/<environment>.log`. Delayed::Job runs in separate
+processes and logs to `log/jobs_<environment>.log`. Executions log to
+individual log files in `log/executions_<environment>/<job_id>.log`.
+
+## Caveats
+
+* When crashing pending executions will not necessarily be scheduled after
+  restart. Only if there is at least one queued execution or some execution is
+  added added/deleted.
+* Logging per execution works only as long as a job is executed in its own Ruby
+  process (which is the case with Delayed::Job) since the log is set globally.
+  In future this may require to set individual log objects for each DOPv/DOPi
+  run.
+
+## Todo
+
+* Test recovering failed workers
 
 ## API Specification
 
@@ -452,45 +489,6 @@ If any of the specified statuses is invalid.
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
 | String | error | Error message | yes |
-
-## Implementation
-
-* Plans are executed in background with Delayed::Job.
-* Scheduling plan executions is done everytime a new execution is added or an
-  execution finishes.
-* When restarting scheduling must be done manually with the `dopc:schedule`
-  rake task.
-* Plans are managed with the plan store from dop_common, nothing is stored in
-  the local database. Plans and executions are connected only by the plan name
-  (no IDs).
-* Only one execution for a specific plan can be running or queued at a time.
-* Before calling DOPi its configuration is loaded from file (usually
-  `~/.dop/dopi.conf`, except when the Rails environment is `test`, then also
-  all executions are started with the `noop` option.
-* Be careful with mocking and setup/teardown in tests, may cause trouble with
-  unclean state in tests or leaving over tmp files/logs/etc.
-
-## Troubleshooting
-
-Rails logs everything to `log/<environment>.log`. Delayed::Job runs in separate
-processes and logs to `log/jobs_<environment>.log`. Executions log to
-individual log files in `log/executions_<environment>/<job_id>.log`.
-
-## Caveats
-
-* When crashing pending executions will not necessarily be scheduled after
-  restart. Only if there is at least one queued execution or some execution is
-  added added/deleted.
-* Logging per execution works only as long as a job is executed in its own Ruby
-  process (which is the case with Delayed::Job) since the log is set globally.
-  In future this may require to set individual log objects for each DOPv/DOPi
-  run.
-
-## Todo
-
-* Test recovering failed workers
-* Must not remove execution that is already queued, or clean up delayed job as
-  well.
 
 ## Authors
 
