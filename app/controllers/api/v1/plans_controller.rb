@@ -14,6 +14,12 @@ class Api::V1::PlansController < Api::V1::ApiController
 
   def show
     begin
+      param_verify(key: :version, types: [String], optional: true, empty: false)
+    rescue InvalidParameterError => e
+      render json: {error: e.to_s}, status: :unprocessable_entity
+      return
+    end
+    begin
       if params[:version]
         yaml = cache.get_plan_yaml(params[:id], params[:version])
       else
@@ -28,6 +34,12 @@ class Api::V1::PlansController < Api::V1::ApiController
   end
 
   def create
+    begin
+      param_verify(key: :content, types: [String], empty: false)
+    rescue InvalidParameterError => e
+      render json: {error: e.to_s}, status: :unprocessable_entity
+      return
+    end
     begin
       content = Base64.decode64(params[:content])
       hash = YAML.load(content)
@@ -50,36 +62,16 @@ class Api::V1::PlansController < Api::V1::ApiController
   end
 
   def update_plan
-    if params[:plan] and params[:content]
-      render json: {error: 'Invalid properties: can only specify one of plan/content'}, status: :unprocessable_entity
+    begin
+      param_verify(key: :content, types: [String], optional: true, empty: false)
+      param_verify(key: :plan, types: [String], optional: true, empty: false)
+      param_verify(key: :clear, types: [TrueClass, FalseClass], optional: true)
+      param_verify(key: :ignore, types: [TrueClass, FalseClass], optional: true)
+      params_must_one([:plan, :content])
+      params_only_one([:plan, :content])
+    rescue InvalidParameterError => e
+      render json: {error: e.to_s}, status: :unprocessable_entity
       return
-    end
-    unless params[:plan] or params[:content]
-      render json: {error: 'Missing property: must specify plan or content'}, status: :unprocessable_entity
-    end
-    if params[:clear]
-      unless params[:clear].is_a?(TrueClass) or params[:clear].is_a?(FalseClass)
-        render json: {error: 'Invalid property: clear must be a boolean'}, status: :unprocessable_entity
-        return
-      end
-    end
-    if params[:ignore]
-      unless params[:ignore].is_a?(TrueClass) or params[:ignore].is_a?(FalseClass)
-        render json: {error: 'Invalid property: ignore must be a boolean'}, status: :unprocessable_entity
-        return
-      end
-    end
-    if params[:content]
-      unless params[:content].is_a?(String)
-        render json: {error: 'Invalid property: content must be a string'}, status: :unprocessable_entity
-        return
-      end
-    end
-    if params[:plan]
-      unless params[:plan].is_a?(String)
-        render json: {error: 'Invalid property: plan must be a string'}, status: :unprocessable_entity
-        return
-      end
     end
     name = params[:plan]
     if params[:content]
@@ -147,17 +139,20 @@ class Api::V1::PlansController < Api::V1::ApiController
   end
 
   def reset
-    unless params[:force].is_a?(TrueClass) or params[:force].is_a?(FalseClass)
-      render json: {error: "Force must be true/false"}, status: :unprocessable_entity
+    begin
+      param_verify(key: :force, types: [TrueClass, FalseClass], optional: true)
+    rescue InvalidParameterError => e
+      render json: {error: e.to_s}, status: :unprocessable_entity
       return
     end
+    force = !!params[:force]
     begin
       cache.get_plan(params[:id])
     rescue StandardError => e
       render json: {error: "Plan not found: #{e}"}, status: :not_found
       return
     end
-    Dopi.reset(params[:id], params[:force])
+    Dopi.reset(params[:id], force)
     render json: {name: params[:id]}
   end
 

@@ -253,7 +253,7 @@ Reset the state of a plan.
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
-| Boolean | force | Force the state reset | yes |
+| Boolean | force | Force the state reset | no |
 
 **200 Success**
 

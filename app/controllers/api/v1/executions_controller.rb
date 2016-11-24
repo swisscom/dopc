@@ -5,45 +5,25 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
   end
 
   def create
-    unless params[:plan]
-      render json: {error: 'Missing property: plan'}, status: :unprocessable_entity
-      return
-    end
-    unless params[:plan].is_a?(String)
-      render json: {error: 'Invalid property: plan must be a string'}, status: :unprocessable_entity
-      return
-    end
-    unless params[:task]
-      render json: {error: 'Missing property: task'}, status: :unprocessable_entity
-      return
-    end
-    unless params[:task].is_a?(String)
-      render json: {error: 'Invalid property: task must be a string'}, status: :unprocessable_entity
-      return
-    end
-    unless PlanExecution.tasks.keys.include? params[:task]
-      render json: {error: "Invalid task '#{params[:task]}', must be one of: #{PlanExecution.tasks.keys}"}, status: :unprocessable_entity
-      return
-    end
-    if params[:stepset]
-      unless params[:stepset].is_a?(String)
-        render json: {error: 'Invalid property: stepset must be a string'}, status: :unprocessable_entity
-        return
+    begin
+      param_verify(key: :plan, types: [String], empty: false)
+      param_verify(key: :task, types: [String], empty: false, values: PlanExecution.tasks.keys)
+      param_verify(key: :stepset, types: [String], optional: true, empty: false)
+      param_verify(key: :rmdisk, types: [TrueClass, FalseClass], optional: true)
+      if params[:stepset]
+        unless params[:task] == 'run' or params[:task] == 'setup'
+          raise InvalidParameterError, 'Invalid parameters: stepset must only be used with tasks run/setup'
+        end
       end
-      unless params[:task] == 'run' or params[:task] == 'setup'
-        render json: {error: 'Too much properties: stepset must only be used with tasks run/setup'}, status: :unprocessable_entity
-        return
+      if params[:rmdisk]
+        unless params[:task] == 'undeploy'
+          raise InvalidParameterError, 'Invalid parameters: rmdisk must only be used with task undeploy'
+          return
+        end
       end
-    end
-    if params[:rmdisk]
-      unless params[:rmdisk].is_a?(TrueClass) or params[:rmdisk].is_a?(FalseClass)
-        render json: {error: 'Invalid property: rmdisk must be a boolean'}, status: :unprocessable_entity
-        return
-      end
-      unless params[:task] == 'undeploy'
-        render json: {error: 'Too much properties: rmdisk must only be used with task undeploy'}, status: :unprocessable_entity
-        return
-      end
+    rescue InvalidParameterError => e
+      render json: {error: e.to_s}, status: :unprocessable_entity
+      return
     end
     exec = PlanExecution.create(plan: params[:plan], task: params[:task], stepset: params[:stepset], rmdisk: params[:rmdisk], status: :new)
     PlanExecution.schedule
@@ -80,14 +60,15 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
 
   def destroy_multiple
     valid_statuses = PlanExecution.remove_statuses
+    begin
+      param_verify(key: :plan, types: [String], optional: true, empty: false)
+      param_verify_list(key: :statuses, types: [String], values: valid_statuses, empty_values: false)
+    rescue InvalidParameterError => e
+      render json: {error: e.to_s}, status: :unprocessable_entity
+      return
+    end
     plan = params[:plan]
     statuses = params[:statuses]
-    statuses.each do |s|
-      unless valid_statuses.include? s
-        render json: {error: "Invalid status '#{s}', must be one of: #{valid_statuses}"}, status: :unprocessable_entity
-        return
-      end
-    end
     destroyed = nil
     PlanExecution.transaction do
       if plan
