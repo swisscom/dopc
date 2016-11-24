@@ -475,8 +475,9 @@ Remove executions.
 
 | Type | Property | Description | Required |
 | --- | --- | --- | --- |
-| String | plan | If specified then only executions of this plan are removed | no |
-| Array of strings | statuses | Executions with a status matching any string of this list are removed | yes |
+| Array of strings | statuses | Remove only executions whose status matches the list| yes |
+| String | plan | Remove only executions that match the plan name | no |
+| Integer | age | Remove only executions that were created at least age seconds ago | no |
 
 **200 OK**
 

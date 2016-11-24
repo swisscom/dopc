@@ -63,19 +63,17 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
     begin
       param_verify(key: :plan, types: [String], optional: true, empty: false)
       param_verify_list(key: :statuses, types: [String], values: valid_statuses, empty_values: false)
+      param_verify(key: :age, types: [Fixnum], optional: true)
     rescue InvalidParameterError => e
       render json: {error: e.to_s}, status: :unprocessable_entity
       return
     end
-    plan = params[:plan]
-    statuses = params[:statuses]
     destroyed = nil
     PlanExecution.transaction do
-      if plan
-        destroyed = PlanExecution.where(plan: plan, status: statuses).destroy_all
-      else
-        destroyed = PlanExecution.where(status: statuses).destroy_all
-      end
+      select = PlanExecution.where(status: params[:statuses])
+      select = select.where(plan: params[:plan]) if params[:plan]
+      select = select.where('created_at < ?', Time.now - params[:age]) if params[:age]
+      destroyed = select.destroy_all
     end
     destroyed.each do |e|
       e.delete_log
