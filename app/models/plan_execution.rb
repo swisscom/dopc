@@ -119,8 +119,11 @@ class PlanExecution < ApplicationRecord
     options = {}
     options.merge!({step_set: self[:stepset]}) if self[:stepset]
     if self[:run_for_nodes]
-      run_options = YAML::load(self[:run_for_nodes])
-      options[:run_for_nodes] = run_options
+      # DOPi does not seem to run when not copying the ostruct object, reason
+      # unknown ...
+      opts = OpenStruct.new(YAML::load(self[:run_for_nodes]))
+      options[:run_for_nodes] = opts
+      log.debug("run options: #{options[:run_for_nodes]}")
     end
     config_file = Dopi.configuration.config_file
     if config_file and File.file?(config_file) and !Rails.env.test?
