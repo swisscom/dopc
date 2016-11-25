@@ -74,7 +74,7 @@ class PlanExecution < ApplicationRecord
   end
 
   def to_hash
-    {id: self[:id], plan: self[:plan], task: self[:task], stepset: self[:stepset], rmdisk: self[:rmdisk], status: self[:status], created_at: self[:created_at], updated_at: self[:updated_at], started_at: self[:started_at], finished_at: self[:finished_at]}
+    {id: self[:id], plan: self[:plan], task: self[:task], stepset: self[:stepset], rmdisk: self[:rmdisk], run_for_nodes: self[:run_for_nodes], status: self[:status], created_at: self[:created_at], updated_at: self[:updated_at], started_at: self[:started_at], finished_at: self[:finished_at]}
   end
 
   def read_log
@@ -118,15 +118,19 @@ class PlanExecution < ApplicationRecord
     log.info('Running DOPi')
     options = {}
     options.merge!({step_set: self[:stepset]}) if self[:stepset]
+    if self[:run_for_nodes]
+      run_options = YAML::load(self[:run_for_nodes])
+      options[:run_for_nodes] = run_options
+    end
     config_file = Dopi.configuration.config_file
     if config_file and File.file?(config_file) and !Rails.env.test?
       config = YAML::load_file(config_file)
       Dopi.configure = config
       log.debug("Loaded DOPi configuration from #{config_file}")
     end
-    Dopi.run(self[:plan], options) {
+    Dopi.run(self[:plan], options) do |plan|
       # Avoid installing signal handler by passing block
-    }
+    end
   end
 
 end

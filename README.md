@@ -77,6 +77,8 @@ TODO
   process (which is the case with Delayed::Job) since the log is set globally.
   In future this may require to set individual log objects for each DOPv/DOPi
   run.
+* Encoding of run_for_nodes parameter as YAML dump of an OpenStruct is ugly.
+  Expand parameters and document?
 
 ## Todo
 
@@ -365,6 +367,7 @@ Get list of all executions.
 | String | &nbsp;&nbsp;- task | Task to execute | yes |
 | String | &nbsp;&nbsp;- stepset | Stepset to execute instead of default | no |
 | Boolean | &nbsp;&nbsp;- rmdisk | Whether to delete disks when undeploying | no |
+| String | &nbsp;&nbsp;- run_for_nodes | Node filters for DOPi encoded as YAML dump of an OpenStruct object| no |
 | String | &nbsp;&nbsp;- status | Execution status | yes |
 | String | &nbsp;&nbsp;- created_at | Timestamp when the execution was created | yes |
 | String | &nbsp;&nbsp;- updated_at | Timestamp when the execution was last updated | yes |
@@ -465,6 +468,7 @@ Special tasks are:
 | String | task | Task to execute, must be one of: deploy, undeploy, run, setup, teardown. | yes |
 | String | stepset | Stepset to run instead of the default, for DOPi | no, can only use with tasks run/setup (if empty the default stepset is used) |
 | Boolean | rmdisk | Whether to delete disks when undeploying, for DOPv | no, can only use with task undeploy (defaults is false) |
+| String | run_for_nodes | Node filters for DOPi, encoded as YAML dump of an OpenStruct object, refer to DOPi or DOPc client documentation for format | no, can only use with tasks run/setup |
 
 **201 Created**
 

@@ -31,13 +31,13 @@ class Api::V1::ApiController < ActionController::API
     APP_CONFIG['auth_token']
   end
 
-  def param_verify(key:, name: nil, types: nil, values: nil, optional: false, empty: true)
+  def param_verify(key:, name: nil, types: nil, values: nil, optional: false, empty: nil)
     name = key.to_s unless name
     if params[key]
       if types and not types.include?(params[key].class)
         raise InvalidParameterError, "Wrong parameter type: type of '#{name}' must be one of '#{types}'"
       end
-      if not empty and params[key].empty?
+      if empty != nil and !empty and params[key].empty?
         raise InvalidParameterError, "Parameter '#{name}' must not be empty"
       end
       if values and not values.include?(params[key])
@@ -50,7 +50,7 @@ class Api::V1::ApiController < ActionController::API
     end
   end
 
-  def param_verify_list(key:, name: nil, types: nil, values: nil, optional: false, empty_list: false, empty_values: true)
+  def param_verify_list(key:, name: nil, types: nil, values: nil, optional: false, empty_list: false, empty_values: nil)
     name = key.to_s unless name
     if params[key]
       unless params[key].is_a?(Array)
@@ -63,7 +63,7 @@ class Api::V1::ApiController < ActionController::API
         if types and not types.include?(val.class)
           raise InvalidParameterError, "Invalid parameter type: type of values in '#{name}' must be one of '#{types}'" 
         end
-        if not empty_values and val.empty?
+        if empty_values != nil and !empty_values and val.empty?
           raise InvalidParameterError, "Values in parameter '#{name}' must not be empty"
         end
         if values and not values.include?(val)

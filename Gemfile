@@ -15,6 +15,9 @@ gem 'dopv',
 gem 'dopi',
   :git => 'https://gitlab.swisscloud.io/clu-dop/dopi.git',
   :tag => 'v0.14.1'
+#gem 'dop_common', :path => '../dop_common'
+#gem 'dopv', :path => '../dopv'
+#gem 'dopi', :path => '../dopv'
 
 group :development, :test do
   gem 'byebug', platform: :mri

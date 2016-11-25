@@ -10,22 +10,21 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
       param_verify(key: :task, types: [String], empty: false, values: PlanExecution.tasks.keys)
       param_verify(key: :stepset, types: [String], optional: true, empty: false)
       param_verify(key: :rmdisk, types: [TrueClass, FalseClass], optional: true)
-      if params[:stepset]
+      param_verify(key: :run_for_nodes, types: [String], optional: true, empty: false)
+      if params[:stepset] or params[:run_for_nodes]
         unless params[:task] == 'run' or params[:task] == 'setup'
-          raise InvalidParameterError, 'Invalid parameters: stepset must only be used with tasks run/setup'
+          raise InvalidParameterError, 'Invalid parameters: parameters stepset/run_for_nodes must only be used with tasks run/setup'
         end
       end
-      if params[:rmdisk]
-        unless params[:task] == 'undeploy'
-          raise InvalidParameterError, 'Invalid parameters: rmdisk must only be used with task undeploy'
-          return
-        end
+      if params[:rmdisk] and params[:task] != 'undeploy'
+        raise InvalidParameterError, 'Invalid parameters: rmdisk must only be used with task undeploy'
+        return
       end
     rescue InvalidParameterError => e
       render json: {error: e.to_s}, status: :unprocessable_entity
       return
     end
-    exec = PlanExecution.create(plan: params[:plan], task: params[:task], stepset: params[:stepset], rmdisk: params[:rmdisk], status: :new)
+    exec = PlanExecution.create(plan: params[:plan], task: params[:task], stepset: params[:stepset], rmdisk: params[:rmdisk], run_for_nodes: params[:run_for_nodes], status: :new)
     PlanExecution.schedule
     render json: {id: exec.id}, status: :created
   end
