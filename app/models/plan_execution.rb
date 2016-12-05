@@ -100,31 +100,33 @@ class PlanExecution < ApplicationRecord
     DopCommon::PlanStore.new(Dopi.configuration.plan_store_dir)
   end
 
+  def options
+    opts = {}
+    if self[:rmdisk]
+      opts[:rmdisk] = self[:rmdisk]
+    end
+    if self[:run_for_nodes]
+      opts[:run_for_nodes] = OpenStruct.new(YAML::load(self[:run_for_nodes]))
+    end
+    if self[:stepset]
+      opts[:step_set] = self[:stepset]
+    end
+    log.debug("run options: #{opts.to_s}")
+    opts
+  end
+
   def dopv_deploy
     log.info('Deploying with DOPv')
-    Dopv.deploy(self[:plan])
+    Dopv.deploy(self[:plan], options)
   end
 
   def dopv_undeploy
     log.info('Undeploying with DOPv')
-    if self[:rmdisk]
-      Dopv.undeploy(self[:plan], true)
-    else
-      Dopv.undeploy(self[:plan])
-    end
+    Dopv.undeploy(self[:plan], options)
   end
 
   def dopi_run
     log.info('Running DOPi')
-    options = {}
-    options.merge!({step_set: self[:stepset]}) if self[:stepset]
-    if self[:run_for_nodes]
-      # DOPi does not seem to run when not copying the ostruct object, reason
-      # unknown ...
-      opts = OpenStruct.new(YAML::load(self[:run_for_nodes]))
-      options[:run_for_nodes] = opts
-      log.debug("run options: #{options[:run_for_nodes]}")
-    end
     config_file = Dopi.configuration.config_file
     if config_file and File.file?(config_file) and !Rails.env.test?
       config = YAML::load_file(config_file)

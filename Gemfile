@@ -8,13 +8,13 @@ gem 'daemons', '~> 1.2.4'
 
 gem 'dop_common',
   :git => 'https://gitlab.swisscloud.io/clu-dop/dop_common.git',
-  :tag => 'v0.9.1'
+  :tag => 'v0.10.0'
 gem 'dopv',
   :git => 'https://gitlab.swisscloud.io/clu-dop/dopv.git',
   :tag => 'master'
 gem 'dopi',
   :git => 'https://gitlab.swisscloud.io/clu-dop/dopi.git',
-  :tag => 'v0.14.1'
+  :tag => 'master'
 #gem 'dop_common', :path => '../dop_common'
 #gem 'dopv', :path => '../dopv'
 #gem 'dopi', :path => '../dopv'
