@@ -17,12 +17,12 @@ class ActiveSupport::TestCase
   end
 
   def mock_cache
-    @cachedir = File.join(@tmpdir, 'cache')
+    @plan_store_dir = File.join(@tmpdir, 'plan_store')
     DopCommon::PlanStore.unstub(:new)
-    plancache = DopCommon::PlanStore.new(@cachedir)
-    DopCommon::PlanStore.stubs(:new).returns(plancache)
-    Dopi.configuration.plan_store_dir = @cachedir
-    Dopi.configuration.log_dir = File.join(@tmpdir, 'log')
+    plan_store = DopCommon::PlanStore.new(@plan_store_dir)
+    DopCommon::PlanStore.stubs(:new).returns(plan_store)
+    DopCommon.config.plan_store_dir = @plan_store_dir
+    DopCommon.config.log_dir = File.join(@tmpdir, 'log')
     Dopi.instance_variable_set('@plan_store', nil)
     Dopv.instance_variable_set('@plan_store', nil)
   end
@@ -64,7 +64,7 @@ class ActiveSupport::TestCase
   def plan_file(name)
     Rails.root.join('test', 'fixtures', 'plans', "#{name}.yaml")
   end
-  
+
   def read_plan(name)
     File.read(plan_file(name))
   end
@@ -78,13 +78,13 @@ class ActiveSupport::TestCase
   end
 
   def add_plan(name)
-    cache = DopCommon::PlanStore.new(@cachedir)
-    cache.add(plan_file(name))
+    plan_store = DopCommon::PlanStore.new(@plan_store_dir)
+    plan_store.add(plan_file(name))
   end
 
   def remove_plan(name)
-    cache = DopCommon::PlanStore.new(@cachedir)
-    cache.remove(name)
+    plan_store = DopCommon::PlanStore.new(@plan_store_dir)
+    plan_store.remove(name)
   end
 
 end

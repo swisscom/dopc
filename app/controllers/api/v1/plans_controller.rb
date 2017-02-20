@@ -8,7 +8,7 @@ require 'dopi/cli/log'
 class Api::V1::PlansController < Api::V1::ApiController
 
   def index
-    plans = cache.list.collect{|i| {name: i}}
+    plans = plan_store.list.collect{|i| {name: i}}
     render json: {plans: plans}
   end
 
@@ -21,9 +21,9 @@ class Api::V1::PlansController < Api::V1::ApiController
     end
     begin
       if params[:version]
-        yaml = cache.get_plan_yaml(params[:id], params[:version])
+        yaml = plan_store.get_plan_yaml(params[:id], params[:version])
       else
-        yaml = cache.get_plan_yaml(params[:id])
+        yaml = plan_store.get_plan_yaml(params[:id])
       end
     rescue StandardError => e
       render json: {error: e}, status: :not_found
@@ -51,9 +51,9 @@ class Api::V1::PlansController < Api::V1::ApiController
     begin
       tmp.write(content)
       tmp.close
-      name = Dopi.add(tmp)
+      name = Dopi.add(tmp.path)
     rescue StandardError => e
-      render json: {error: "Failed to add plan: #{e}"}, status: :bad_request
+      render json: {error: "Failed to add plan: #{e.backtrace}"}, status: :bad_request
       return
     ensure
       tmp.unlink
@@ -91,7 +91,7 @@ class Api::V1::PlansController < Api::V1::ApiController
         tmp = Tempfile.new('dopc')
         tmp.write(content)
         tmp.close
-        unless Dopi.valid?(tmp)
+        unless Dopi.valid?(tmp.path)
           render json: {error: 'Plan is not valid'}, status: :unprocessable_entity
           return
         end
@@ -101,7 +101,7 @@ class Api::V1::PlansController < Api::V1::ApiController
           render json: {error: "Can not update a plan that has running executions"}, status: :conflict
           return
         end
-        cache.update(tmp) if params[:content]
+        plan_store.update(tmp.path) if params[:content]
         options = {}
         options[:clear] = true if params[:clear]
         options[:ignore] = true if params[:ignore]
@@ -123,14 +123,14 @@ class Api::V1::PlansController < Api::V1::ApiController
   end
 
   def destroy
-    render json: {name: cache.remove(params[:id])}
+    render json: {name: plan_store.remove(params[:id])}
   rescue StandardError => e
     render json: {error: e}, status: :not_found
   end
 
   def versions
     begin
-      versions = cache.show_versions(params[:id]).collect{|i| {name: i}}
+      versions = plan_store.show_versions(params[:id]).collect{|i| {name: i}}
     rescue StandardError => e
       render json: {error: e}, status: :not_found
       return
@@ -147,7 +147,7 @@ class Api::V1::PlansController < Api::V1::ApiController
     end
     force = !!params[:force]
     begin
-      cache.get_plan(params[:id])
+      plan_store.get_plan(params[:id])
     rescue StandardError => e
       render json: {error: "Plan not found: #{e}"}, status: :not_found
       return
@@ -158,7 +158,7 @@ class Api::V1::PlansController < Api::V1::ApiController
 
   def state
     begin
-      cache.get_plan(params[:id])
+      plan_store.get_plan(params[:id])
     rescue StandardError => e
       render json: {error: "Plan not found: #{e}"}, status: :not_found
       return
@@ -168,8 +168,8 @@ class Api::V1::PlansController < Api::V1::ApiController
 
   private
 
-  def cache
-    DopCommon::PlanStore.new(Dopi.configuration.plan_store_dir)
+  def plan_store
+    DopCommon::PlanStore.new(DopCommon.config.plan_store_dir)
   end
 
 end

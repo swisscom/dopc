@@ -1,38 +1,23 @@
 class Api::V1::ExecutionsController < Api::V1::ApiController
 
   def index
-    render json: {executions: PlanExecution.all.collect{|e| e.to_hash}}
+    render json: PlanExecution.all
   end
 
   def create
-    begin
-      param_verify(key: :plan, types: [String], empty: false)
-      param_verify(key: :task, types: [String], empty: false, values: PlanExecution.tasks.keys)
-      param_verify(key: :stepset, types: [String], optional: true, empty: false)
-      param_verify(key: :rmdisk, types: [TrueClass, FalseClass], optional: true)
-      param_verify(key: :run_for_nodes, types: [String], optional: true, empty: false)
-      if params[:stepset]
-        unless params[:task] == 'run' or params[:task] == 'setup'
-          raise InvalidParameterError, 'Invalid parameters: parameter stepset must only be used with tasks run/setup'
-        end
-      end
-      if params[:rmdisk] and params[:task] != 'undeploy'
-        raise InvalidParameterError, 'Invalid parameters: rmdisk must only be used with task undeploy'
-        return
-      end
-    rescue InvalidParameterError => e
-      render json: {error: e.to_s}, status: :unprocessable_entity
-      return
+    plan_execution = PlanExecution.new(plan_execution_params)
+    if plan_execution.save
+      ExecutePlanJob.perform_later(plan_execution)
+      render json: plan_execution, status: :created
+    else
+      render json: {error: plan_execution.errors}, status: :unprocessable_entity
     end
-    exec = PlanExecution.create(plan: params[:plan], task: params[:task], stepset: params[:stepset], rmdisk: params[:rmdisk], run_for_nodes: params[:run_for_nodes], status: :new)
-    PlanExecution.schedule
-    render json: {id: exec.id}, status: :created
   end
 
   def show
     execution = PlanExecution.find_by_id(params[:id])
     if execution
-      render json: execution.to_hash
+      render json: execution
     else
       render json: {error: 'Execution not found'}, status: :not_found
     end
@@ -53,8 +38,7 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
       execution.destroy
     end
     execution.delete_log
-    PlanExecution.schedule
-    render json: execution.to_hash
+    render json: execution
   end
 
   def destroy_multiple
@@ -77,8 +61,7 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
     destroyed.each do |e|
       e.delete_log
     end
-    PlanExecution.schedule
-    render json: {executions: destroyed.collect{|e| e.to_hash}}
+    render json: destroyed
   end
 
   def log
@@ -88,6 +71,22 @@ class Api::V1::ExecutionsController < Api::V1::ApiController
     else
       render json: {error: 'Execution not found'}, status: :not_found
     end
+  end
+
+  private
+
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def plan_execution_params
+    params.permit(
+      :plan,
+      :task,
+      :run_options => [
+        :step_set,
+        :noop,
+        :rmdisk,
+        :run_for_nodes => {},
+      ],
+    )
   end
 
 end

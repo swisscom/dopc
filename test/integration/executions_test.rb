@@ -29,13 +29,13 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     assert_equal id, data['id']
     assert_equal 'hello_world', data['plan']
     assert_equal 'deploy', data['task']
-    assert_includes ['new', 'queued'], data['status']
+    assert_equal 'new', data['status']
     assert_not_empty data['created_at']
     assert_not_empty data['updated_at']
   end
 
   test 'start run' do
-    post '/api/v1/executions', params: {plan: 'hello_world', task: 'run', stepset: 'default'}, headers: auth_header, as: :json
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'run', run_options: {step_set: 'default'}}, headers: auth_header, as: :json
     assert_response :created
     data = JSON.parse(@response.body)
     id = data['id']
@@ -46,14 +46,14 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     assert_equal id, data['id']
     assert_equal 'hello_world', data['plan']
     assert_equal 'run', data['task']
-    assert_includes ['new', 'queued'], data['status']
-    assert_equal 'default', data['stepset']
+    assert_equal 'new', data['status']
+    assert_equal 'default', data['run_options']['step_set']
     assert_not_empty data['created_at']
     assert_not_empty data['updated_at']
   end
 
   test 'start setup' do
-    post '/api/v1/executions', params: {plan: 'hello_world', task: 'setup', stepset: 'default'}, headers: auth_header, as: :json
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'setup', run_options: {step_set: 'default'}}, headers: auth_header, as: :json
     assert_response :created
     data = JSON.parse(@response.body)
     id = data['id']
@@ -64,14 +64,14 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     assert_equal id, data['id']
     assert_equal 'hello_world', data['plan']
     assert_equal 'setup', data['task']
-    assert_includes ['new', 'queued'], data['status']
-    assert_equal 'default', data['stepset']
+    assert_equal 'new', data['status']
+    assert_equal 'default', data['run_options']['step_set']
     assert_not_empty data['created_at']
     assert_not_empty data['updated_at']
   end
 
   test 'start undeployment' do
-    post '/api/v1/executions', params: {plan: 'hello_world', task: 'undeploy', rmdisk: true}, headers: auth_header, as: :json
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'undeploy', run_options: {rmdisk: true}}, headers: auth_header, as: :json
     assert_response :created
     data = JSON.parse(@response.body)
     id = data['id']
@@ -82,8 +82,8 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     assert_equal id, data['id']
     assert_equal 'hello_world', data['plan']
     assert_equal 'undeploy', data['task']
-    assert_includes ['new', 'queued'], data['status']
-    assert_equal true, data['rmdisk']
+    assert_equal 'new', data['status']
+    assert_equal true, data['run_options']['rmdisk']
     assert_not_empty data['created_at']
     assert_not_empty data['updated_at']
   end
@@ -124,28 +124,21 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
   end
 
   test 'invalid stepset name type' do
-    post '/api/v1/executions', params: {plan: 'hello_world', task: 'run', stepset: 0.1}, headers: auth_header, as: :json
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'run', run_options: {step_set: 0.1}}, headers: auth_header, as: :json
     assert_response :unprocessable_entity
     data = JSON.parse(@response.body)
     assert_not_empty data['error']
   end
 
   test 'illegal stepset' do
-    post '/api/v1/executions', params: {plan: 'hello_world', task: 'deploy', stepset: 'default'}, headers: auth_header, as: :json
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'deploy', run_options: {step_set: 'default2'}}, headers: auth_header, as: :json
     assert_response :unprocessable_entity
     data = JSON.parse(@response.body)
     assert_not_empty data['error']
   end
 
   test 'invalid rmdisk type' do
-    post '/api/v1/executions', params: {plan: 'hello_world', task: 'undeploy', rmdisk: 'true'}, headers: auth_header, as: :json
-    assert_response :unprocessable_entity
-    data = JSON.parse(@response.body)
-    assert_not_empty data['error']
-  end
-
-  test 'illegal rmdisk' do
-    post '/api/v1/executions', params: {plan: 'hello_world', task: 'deploy', rmdisk: true}, headers: auth_header, as: :json
+    post '/api/v1/executions', params: {plan: 'hello_world', task: 'undeploy', run_options: {rmdisk: 'true'}}, headers: auth_header, as: :json
     assert_response :unprocessable_entity
     data = JSON.parse(@response.body)
     assert_not_empty data['error']
@@ -155,8 +148,8 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     get '/api/v1/executions', headers: auth_header, as: :json
     assert_response :success
     data = JSON.parse(@response.body)
-    execution = data['executions'].first
-    assert_equal nil, execution
+    execution = data.first
+    assert_nil execution
   end
 
   test 'remove execution' do
@@ -190,14 +183,14 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     delete "/api/v1/executions", params: {statuses: ['new']}, headers: auth_header, as: :json
     assert_response :success
     data = JSON.parse(@response.body)
-    assert_empty data['executions'].collect{|e| e['id']} - ids
+    assert_empty data.collect{|e| e['id']} - ids
   end
 
   test 'no execution found to remove' do
     delete "/api/v1/executions", params: {statuses: ['done']}, headers: auth_header, as: :json
     assert_response :success
     data = JSON.parse(@response.body)
-    assert_empty data['executions']
+    assert_empty data
   end
 
   test 'can not remove running executions' do
@@ -218,7 +211,7 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
    get "/api/v1/executions/#{id}", headers: auth_header, as: :json
    assert_response :success
    data = JSON.parse(@response.body)
-   assert_equal 'queued', data['status']
+   assert_equal 'new', data['status']
    Delayed::Worker.new.work_off
    get "/api/v1/executions/#{id}", headers: auth_header, as: :json
    assert_response :success
@@ -234,7 +227,7 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     get "/api/v1/executions/#{id}", headers: auth_header, as: :json
     assert_response :success
     data = JSON.parse(@response.body)
-    assert_equal 'queued', data['status']
+    assert_equal 'new', data['status']
     Delayed::Worker.new.work_off
     get "/api/v1/executions/#{id}", headers: auth_header, as: :json
     assert_response :success
@@ -265,7 +258,7 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     get "/api/v1/executions/#{id}", headers: auth_header, as: :json
     assert_response :success
     data = JSON.parse(@response.body)
-    assert_equal 'queued', data['status']
+    assert_equal 'new', data['status']
     Delayed::Worker.new.work_off
     get "/api/v1/executions/#{id}", headers: auth_header, as: :json
     assert_response :success
@@ -281,7 +274,7 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     get "/api/v1/executions/#{id1}", headers: auth_header, as: :json
     assert_response :success
     data = JSON.parse(@response.body)
-    assert_equal 'queued', data['status']
+    assert_equal 'new', data['status']
     post '/api/v1/executions', params: {plan: 'hello_world', task: 'setup'}, headers: auth_header, as: :json
     assert_response :created
     data = JSON.parse(@response.body)
@@ -321,14 +314,14 @@ class ExecutionsTest < ActionDispatch::IntegrationTest
     assert_response :created
     data = JSON.parse(@response.body)
     id2 = data['id']
-    delete '/api/v1/executions', params: {statuses: ['new', 'queued']}, headers: auth_header, as: :json
+    delete '/api/v1/executions', params: {statuses: ['new']}, headers: auth_header, as: :json
     assert_response :success
     data = JSON.parse(@response.body)
-    assert_equal 2, data['executions'].size
+    assert_equal 2, data.size
     get '/api/v1/executions', headers: auth_header, as: :json
     assert_response :success
     data = JSON.parse(@response.body)
-    assert_empty data['executions']
+    assert_empty data
   end
 
   test 'execute updated plan' do

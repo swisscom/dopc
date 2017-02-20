@@ -8,8 +8,37 @@ require 'yaml'
 
 class PlanExecution < ApplicationRecord
 
-  enum status: [:new, :queued, :running, :done, :failed], _prefix: true
-  enum task: [:setup, :run, :deploy, :undeploy, :teardown], _prefix: true
+  enum status: [:new, :running, :done, :failed], _prefix: true
+
+  valid_tasks = %w{setup run deploy undeploy teardown}
+
+  validates :plan, presence: true, inclusion: {
+    in: proc {|rec| plan_store.list },
+    message: "The plan '%[value]' is not in the plan store",
+  }
+  validates :task, presence: true, inclusion: {
+    in: valid_tasks,
+    message: "Task '%{value}' is invalid. Valid tasks are: #{valid_tasks.join(', ')}",
+  }
+
+  serialize :run_options, Hash
+  validates_each :run_options do |record, attr, value|
+    next if value.nil?
+    if value.kind_of?(Hash)
+      if value.has_key?(:rmdisk)
+        unless value[:rmdisk].in? [true, false]
+          record.errors.add(:run_options, "the run_option 'rmdisk' has to be a boolean")
+        end
+      end
+      if value.has_key?(:step_set)
+        unless value[:step_set].in? list_step_sets(record.plan)
+          record.errors.add(:run_options, "'#{value}' is not a valid step_set for the plan")
+        end
+      end
+    else
+      record.errors.add(:run_options, "run_options has to be a key value map")
+    end
+  end
 
   def self.log
     Delayed::Worker.logger
@@ -19,40 +48,31 @@ class PlanExecution < ApplicationRecord
     File.join(Rails.root, 'log', 'executions_' + Rails.env)
   end
 
-  def self.schedule
-    log.info('Checking for new plan executions')
-    PlanExecution.transaction do
-      # TODO: Optimize query?
-      PlanExecution.where(status: :new).group(:plan).having('id = MIN(id)').each do |pe|
-        numQueued = PlanExecution.where(plan: pe.plan, status: :queued).count
-        numRunning = PlanExecution.where(plan: pe.plan, status: :running).count
-        if numQueued == 0 and numRunning == 0
-          pe.status_queued!
-          ExecutePlanJob.perform_later(pe)
-          log.info("Scheduled execution #{pe.id}")
-        end
-      end
-    end
+  def self.remove_statuses
+    statuses.keys - [:running]
   end
 
-  def self.remove_statuses
-    statuses = self.statuses.keys
-    statuses.delete('running')
-    statuses
+  def self.plan_store
+    DopCommon::PlanStore.new(DopCommon.config.plan_store_dir)
+  end
+
+  # This should probably be moved somewhere to dop_common
+  def self.list_step_sets(plan_name)
+    plan_store.get_plan(plan_name).step_sets.map{|step_set| step_set.name}
   end
 
   def run
     Log.set_loggers(log)
-    self.status_running!
-    self.update(started_at: Time.now)
+    status_running!
+    update(started_at: Time.now)
     log.info('Execution started')
-    case self[:task]
+    case task
     when 'setup'
       dopv_deploy
       dopi_run
     when 'teardown'
       dopv_undeploy
-      Dopi.reset(self[:plan], true)
+      Dopi.reset(plan, true)
     when 'deploy'
       dopv_deploy
     when 'run'
@@ -60,21 +80,16 @@ class PlanExecution < ApplicationRecord
     when 'undeploy'
       dopv_undeploy
     else
-      raise "Invalid task: #{self[:task]}"
+      raise "Invalid task: #{task}"
     end
-    self.status_done!
+    status_done!
     log.info('Execution done')
   rescue Exception => e
-    self.status_failed!
+    status_failed!
     log.error("Execution failed: #{e.message}: #{e.backtrace.join('\n')}")
   ensure
-    self.update(finished_at: Time.now)
+    update(finished_at: Time.now)
     Log.set_loggers(Delayed::Worker.logger, true)
-    self.class.schedule
-  end
-
-  def to_hash
-    {id: self[:id], plan: self[:plan], task: self[:task], stepset: self[:stepset], rmdisk: self[:rmdisk], run_for_nodes: self[:run_for_nodes], status: self[:status], created_at: self[:created_at], updated_at: self[:updated_at], started_at: self[:started_at], finished_at: self[:finished_at]}
   end
 
   def read_log
@@ -96,23 +111,16 @@ class PlanExecution < ApplicationRecord
     @log ||= Logger.new(log_file)
   end
 
-  def cache
-    DopCommon::PlanStore.new(Dopi.configuration.plan_store_dir)
-  end
-
+  # We should probably just support a Hash as an argument
+  # in the node_filter method in dop_common
   def options
-    opts = {}
-    if self[:rmdisk]
-      opts[:rmdisk] = self[:rmdisk]
+    if run_options[:run_for_nodes].kind_of?(Hash)
+      run_options.merge({
+        :run_for_nodes => OpenStruct.new(run_options[:run_for_nodes])
+      })
+    else
+      run_options
     end
-    if self[:run_for_nodes]
-      opts[:run_for_nodes] = OpenStruct.new(YAML::load(self[:run_for_nodes]))
-    end
-    if self[:stepset]
-      opts[:step_set] = self[:stepset]
-    end
-    log.debug("run options: #{opts.to_s}")
-    opts
   end
 
   def dopv_deploy
@@ -127,14 +135,8 @@ class PlanExecution < ApplicationRecord
 
   def dopi_run
     log.info('Running DOPi')
-    config_file = Dopi.configuration.config_file
-    if config_file and File.file?(config_file) and !Rails.env.test?
-      config = YAML::load_file(config_file)
-      Dopi.configure = config
-      log.debug("Loaded DOPi configuration from #{config_file}")
-    end
     Dopi.run(self[:plan], options) do |plan|
-      # Avoid installing signal handler by passing block
+      # May support streaming and pause/stop/kill in the future
     end
   end
 
