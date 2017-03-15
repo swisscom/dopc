@@ -1,5 +1,5 @@
 GIT
-  remote: https://gitlab.swisscloud.io/puppet-dop/dop_common.git
+  remote: https://github.com/swisscom/dop_common.git
   revision: 7cc03d85598831bd3f86af24ceb8d8e0693a6b04
   tag: v0.11.3
   specs:
@@ -9,7 +9,7 @@ GIT
       rb-inotify (~> 0.9)
 
 GIT
-  remote: https://gitlab.swisscloud.io/puppet-dop/dopi.git
+  remote: https://github.com/swisscom/dopi.git
   revision: caff56c523a23948f469802ddb0769143df436e2
   tag: v0.15.2
   specs:
@@ -24,7 +24,7 @@ GIT
       winrm (~> 1)
 
 GIT
-  remote: https://gitlab.swisscloud.io/puppet-dop/dopv.git
+  remote: https://github.com/swisscom/dopv.git
   revision: de5a8b60c0083f1e7508e10bef033a0e1e06f135
   tag: v0.7.3
   specs:

@@ -7,13 +7,13 @@ gem 'delayed_job_active_record', '~> 4.1.1'
 gem 'daemons', '~> 1.2.4'
 
 gem 'dop_common',
-  :git => 'https://gitlab.swisscloud.io/puppet-dop/dop_common.git',
+  :git => 'https://github.com/swisscom/dop_common.git',
   :tag => 'v0.11.3'
 gem 'dopv',
-  :git => 'https://gitlab.swisscloud.io/puppet-dop/dopv.git',
+  :git => 'https://github.com/swisscom/dopv.git',
   :tag => 'v0.7.3'
 gem 'dopi',
-  :git => 'https://gitlab.swisscloud.io/puppet-dop/dopi.git',
+  :git => 'https://github.com/swisscom/dopi.git',
   :tag => 'v0.15.2'
 #gem 'dop_common', :path => '../dop_common'
 #gem 'dopv', :path => '../dopv'
