@@ -1,3 +1,6 @@
+> [!NOTE]
+> DEPRECATED - no longer maintained!
+
 # DOPc
 
 DOPc combines DOPi and DOPv in one tools and exposes a REST API.
